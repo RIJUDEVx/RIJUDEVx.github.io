@@ -3,6 +3,7 @@
 
 export const profile = {
   name: 'Riju Dev Purkayastha',
+  handle: 'RIJUDEVx',
   short: 'Riju',
   monogram: 'rd.',
   title: 'Senior Software Engineer',

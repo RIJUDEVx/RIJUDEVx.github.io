@@ -30,15 +30,35 @@ const HEIGHT = LABEL_H + 7 * STEP - GAP;
 let graph: Graph | null = null;
 const controller = new AbortController();
 const timer = setTimeout(() => controller.abort(), 6000);
+// GitHub's own contributions fragment includes private contributions when the
+// profile shows them, which the third-party API does not. Parse it first.
+async function fromGitHub(): Promise<Graph | null> {
+  const res = await fetch(`https://github.com/users/${encodeURIComponent(user)}/contributions`, { signal: controller.signal, headers: { Accept: 'text/html' } });
+  if (!res.ok) return null;
+  const html = await res.text();
+  const counts = new Map<string, number>();
+  for (const m of html.matchAll(/for="([^"]+)"[^>]*>(\d+|No) contributions? on/g)) counts.set(m[1], m[2] === 'No' ? 0 : Number(m[2]));
+  const days: Day[] = [];
+  for (const m of html.matchAll(/data-date="(\d{4}-\d{2}-\d{2})"\s+id="([^"]+)"[^>]*data-level="(\d)"/g)) {
+    days.push({ date: m[1], count: counts.get(m[2]) ?? 0, level: Number(m[3]) });
+  }
+  if (!days.length) return null;
+  days.sort((a, b) => a.date.localeCompare(b.date));
+  return { total: { lastYear: days.reduce((n, d) => n + d.count, 0) }, contributions: days };
+}
+
 try {
-  const res = await fetch(
-    `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=last`,
-    { signal: controller.signal },
-  );
-  if (res.ok) {
-    const json = (await res.json()) as Graph;
-    if (Array.isArray(json.contributions) && json.contributions.length > 0 && typeof json.total?.lastYear === 'number') {
-      graph = json;
+  graph = await fromGitHub();
+  if (!graph) {
+    const res = await fetch(
+      `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=last`,
+      { signal: controller.signal },
+    );
+    if (res.ok) {
+      const json = (await res.json()) as Graph;
+      if (Array.isArray(json.contributions) && json.contributions.length > 0 && typeof json.total?.lastYear === 'number') {
+        graph = json;
+      }
     }
   }
 } catch (err) {

@@ -20,7 +20,8 @@ interface Props {
   video?: VideoMeta;
 }
 const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}`, page = 'home', faq, work, video } = Astro.props;
-const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.title}`;
+// Browser title is just the GitHub handle (Riju's call, 13 Nov 2026). The full name stays in og/meta/JSON-LD.
+const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
 ---
 <!doctype html>
 <html lang="en">
@@ -35,6 +36,10 @@ const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
         if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.theme = t;
+        // Nav design under review: ?nav=pill|island|rail|classic, remembered in localStorage.
+        var nav = new URLSearchParams(location.search).get('nav');
+        try { if (nav) localStorage.setItem('rd:nav', nav); else nav = localStorage.getItem('rd:nav'); } catch (e) {}
+        document.documentElement.dataset.nav = /^(pill|island|rail|classic)$/.test(nav || '') ? nav : 'pill';
         // First visit this session on the home page: Intro.svelte plays.
         var seen = null;
         try { seen = sessionStorage.getItem('rd:intro'); } catch (e) {}
@@ -46,6 +51,9 @@ const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${
         var t = null;
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
         if (t) document.documentElement.dataset.theme = t;
+        var n = null;
+        try { n = localStorage.getItem('rd:nav'); } catch (e) {}
+        if (n) document.documentElement.dataset.nav = n;
       });
     </script>
     <script is:inline>
