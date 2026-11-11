@@ -16,6 +16,14 @@
   let time = $state('');
   let status = $state('');
   let tickerIndex = $state(0);
+  // The section label only changes once scrolling settles, so fast scrolls don't flicker it.
+  let shownLabel = $state('');
+  let labelTimer: ReturnType<typeof setTimeout>;
+  $effect(() => {
+    const next = page.state.path === '/' && page.state.active !== 'top' ? page.state.label : '';
+    clearTimeout(labelTimer);
+    labelTimer = setTimeout(() => { shownLabel = next; }, 320);
+  });
   let copied = $state(false);
   let shell: HTMLElement | undefined = $state();
   let closedEl: HTMLElement | undefined = $state();
@@ -112,9 +120,8 @@
     };
   });
 
-  $effect(() => { page.state.label; tickerIndex; time; if (!open) measure(); });
 
-  const R = 6, C = 2 * Math.PI * R;
+
 </script>
 
 <div class="anchor">
@@ -135,16 +142,12 @@
         <span class="h">{handle}</span>
         <span class="sep" aria-hidden="true"></span>
         <span class="tick">
-          {#key `${page.state.label}|${tickerIndex}`}
-            <span class="tk" in:fly={{ y: 8, duration: reducedMotion() ? 0 : 220 }} out:fly={{ y: -8, duration: reducedMotion() ? 0 : 160 }}>
-              {page.state.path === '/' && page.state.active !== 'top' && tickerIndex === 0 ? page.state.label : tickers[tickerIndex]}
+          {#key `${shownLabel}|${tickerIndex}`}
+            <span class="tk" in:fly={{ y: 8, duration: reducedMotion() ? 0 : 220, delay: reducedMotion() ? 0 : 120 }} out:fly={{ y: -8, duration: reducedMotion() ? 0 : 120 }}>
+              {shownLabel && tickerIndex === 0 ? shownLabel : tickers[tickerIndex]}
             </span>
           {/key}
         </span>
-        <svg class="ring" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-          <circle cx="8" cy="8" r={R} class="track" />
-          <circle cx="8" cy="8" r={R} class="fill" style={`stroke-dasharray:${C};stroke-dashoffset:${C * (1 - page.state.progress)}`} />
-        </svg>
       </button>
     {:else}
       <div class="panel" bind:this={openEl} in:fade={{ duration: 120, delay: 50 }}>
@@ -198,12 +201,8 @@
   .mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: var(--bg); font-size: 0.875rem; padding-bottom: 2px; box-sizing: border-box; }
   .h { font-weight: 600; letter-spacing: -0.01em; }
   .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--dim); }
-  .tick { display: grid; overflow: hidden; color: var(--dim); }
-  .tk { grid-area: 1 / 1; }
-  .ring { margin-left: 2px; transform: rotate(-90deg); }
-  .ring circle { fill: none; stroke-width: 2; }
-  .ring .track { stroke: var(--line); }
-  .ring .fill { stroke: #3ecf7a; stroke-linecap: round; transition: stroke-dashoffset 0.12s linear; }
+  .tick { display: grid; overflow: hidden; color: var(--dim); width: 9.75rem; }
+  .tk { grid-area: 1 / 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .panel { width: 320px; padding: 14px; box-sizing: border-box; }
   .who { display: flex; gap: 10px; align-items: center; padding: 2px 4px 0; }

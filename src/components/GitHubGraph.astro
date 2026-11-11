@@ -26,47 +26,9 @@ const LABEL_H = 16;
 const WIDTH = WEEKS * STEP - GAP;
 const HEIGHT = LABEL_H + 7 * STEP - GAP;
 
-// Fetched at build time. If the API is slow or down, render a plain link card instead.
-let graph: Graph | null = null;
-const controller = new AbortController();
-const timer = setTimeout(() => controller.abort(), 6000);
-// GitHub's own contributions fragment includes private contributions when the
-// profile shows them, which the third-party API does not. Parse it first.
-async function fromGitHub(): Promise<Graph | null> {
-  const res = await fetch(`https://github.com/users/${encodeURIComponent(user)}/contributions`, { signal: controller.signal, headers: { Accept: 'text/html' } });
-  if (!res.ok) return null;
-  const html = await res.text();
-  const counts = new Map<string, number>();
-  for (const m of html.matchAll(/for="([^"]+)"[^>]*>(\d+|No) contributions? on/g)) counts.set(m[1], m[2] === 'No' ? 0 : Number(m[2]));
-  const days: Day[] = [];
-  for (const m of html.matchAll(/data-date="(\d{4}-\d{2}-\d{2})"\s+id="([^"]+)"[^>]*data-level="(\d)"/g)) {
-    days.push({ date: m[1], count: counts.get(m[2]) ?? 0, level: Number(m[3]) });
-  }
-  if (!days.length) return null;
-  days.sort((a, b) => a.date.localeCompare(b.date));
-  return { total: { lastYear: days.reduce((n, d) => n + d.count, 0) }, contributions: days };
-}
-
-try {
-  graph = await fromGitHub();
-  if (!graph) {
-    const res = await fetch(
-      `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=last`,
-      { signal: controller.signal },
-    );
-    if (res.ok) {
-      const json = (await res.json()) as Graph;
-      if (Array.isArray(json.contributions) && json.contributions.length > 0 && typeof json.total?.lastYear === 'number') {
-        graph = json;
-      }
-    }
-  }
-} catch (err) {
-  console.warn(`GitHub graph unavailable for ${user}:`, err);
-  graph = null;
-} finally {
-  clearTimeout(timer);
-}
+import { getContributions } from '../lib/github';
+const data = await getContributions(user);
+const graph: Graph | null = data ? { total: { lastYear: data.total }, contributions: data.days } : null;
 
 // Dates are YYYY-MM-DD; parse as UTC so the timezone of the build machine doesn't shift them.
 const parse = (d: string) => new Date(`${d}T00:00:00Z`);

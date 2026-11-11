@@ -14,13 +14,31 @@ import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
 import Pipeline from '../components/Pipeline.svelte';
-import GitHubGraph from '../components/GitHubGraph.astro';
+import WorkIndex from '../components/WorkIndex.svelte';
+import ContribPulse from '../components/bento/ContribPulse.svelte';
+import StackKeys from '../components/bento/StackKeys.svelte';
+import DayDial from '../components/bento/DayDial.svelte';
+import { getContributions, summarise } from '../lib/github';
 import Brand from '../components/Brand.astro';
 import { profile, links, questions, experience, statusLabel, stackIcons, education } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 const writing = await getCollection('writing');
+// Dates from profile/career-facts.md.
+const milestones = [
+  { when: 'Jan 2022', what: 'Joined as an intern.', detail: 'Switch to Classic, Remote Tooling.' },
+  { when: 'Oct 2022', what: 'Native iOS.', detail: 'Attenta Yoga, then top contributor on AttentaFit.' },
+  { when: 'Aug 2024', what: 'Started Selegic CRM, alone.', detail: 'Empty repo to v1.0.0 by Jan 2025.' },
+  { when: 'Apr 2025', what: 'Selegic Internal.', detail: "The company's time-tracking platform." },
+  { when: 'Mar 2026', what: 'Extension platform.', detail: 'Public SDK and CLI for outside developers.' },
+  { when: 'Now', what: 'Leading the CRM team.', detail: '236 changes shipped since Jul 2026.' },
+];
+const items = work.map((w) => ({ id: w.id, title: w.data.title, area: w.data.area, status: statusLabel[w.data.status].text, tone: statusLabel[w.data.status].tone, year: '', summary: w.data.summary, stats: w.data.stats, stack: w.data.stack, img: `/og/work/${w.id}.png` }));
 const social = links.filter((l) => l.brand);
+const contrib = await getContributions('RIJUDEVx');
+const pulse = contrib ? { total: contrib.total, ...summarise(contrib) } : null;
+const brandFiles = import.meta.glob('../assets/brands/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../assets/brands/${s.icon}.svg`] ?? '').replace(/<\?xml[^>]*>/, '').replace(/\s(width|height)="[^"]*"/g, '') }));
 const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
 ---
 <Base page="home" faq={questions}>
@@ -53,24 +71,9 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     </CutLine>
   </div>
 
-  <section class="index" id="work" data-index>
+  <section class="index" id="work">
     <div class="label-row"><h2 class="label mono">Work</h2><span class="mono muted">{work.length} projects · 2022 – now</span></div>
-    <div class="ih mono" aria-hidden="true"><span></span><span>Project</span><span>Area</span><span>Status</span><span>Year</span></div>
-    <ol>
-      {work.map((w, i) => (
-        <li>
-          <a href={`/work/${w.id}`} data-preview={`/og/work/${w.id}.png`} data-cursor="open" data-sound="tap">
-            <span class="mono n">{String(i + 1).padStart(2, '0')}</span>
-            <span class="ttl" transition:name={`title-${w.id}`}>{w.data.title}</span>
-            <span class="area">{w.data.area}</span>
-            <span class="mono st" data-tone={statusLabel[w.data.status].tone}>{statusLabel[w.data.status].text}</span>
-            <span class="mono yr">{year(w.data.years)}</span>
-            <span class="sum">{w.data.summary}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-    <img class="float" alt="" aria-hidden="true" width="1200" height="630" />
+    <WorkIndex client:visible items={items.map((it, i) => ({ ...it, year: year(work[i].data.years) }))} />
   </section>
 
   <section class="glance" id="glance" data-spotlight>
@@ -78,14 +81,11 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     <div class="grid">
       <div class="t ask" id="ask"><Questions client:visible questions={questions} /></div>
 
-      <div class="t now">
-        <span class="k mono">Now</span>
-        <p class="big"><Clock client:load variant="hero" /></p>
-        <p class="small muted">Leading the Selegic CRM team. Writing about how we ship.</p>
-      </div>
+      <div class="t now"><DayDial client:visible /></div>
 
       <div class="t edu">
         <span class="k mono">Education</span>
+        <p class="gpa">{education.cgpa}<span>CGPA</span></p>
         <p class="small ink">B.Tech, Computer Science</p>
         <p class="small muted">MAKAUT · {education.years}</p>
       </div>
@@ -93,10 +93,18 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
       <div class="t xp" id="experience">
         <div class="xp-head"><span class="k mono">Experience</span><span class="mono muted small">{experience.dates}</span></div>
         <h3>{experience.role} <span class="muted">· {experience.company}</span></h3>
-        <ul>{experience.long.map((l) => <li>{l}</li>)}</ul>
+        <ol class="path">
+          {milestones.map((m, i) => (
+            <li class:list={{ now: i === milestones.length - 1 }}>
+              <span class="when mono">{m.when}</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span class="what">{m.what}<span class="muted"> {m.detail}</span></span>
+            </li>
+          ))}
+        </ol>
       </div>
 
-      <div class="t gh"><GitHubGraph user="RIJUDEVx" /></div>
+      <div class="t gh">{pulse ? <ContribPulse client:visible user="RIJUDEVx" {...pulse} /> : <a class="mono" href="https://github.com/RIJUDEVx">github.com/RIJUDEVx ↗</a>}</div>
 
       <div class="t writing">
         <div class="xp-head"><span class="k mono">Writing</span><span class="mono muted small">drafts</span></div>
@@ -107,14 +115,7 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
         </ul>
       </div>
 
-      <div class="t stack">
-        <span class="k mono">Stack I reach for</span>
-        <div class="marquee" aria-label="Tech stack">
-          <div class="track">
-            {[...stackIcons, ...stackIcons].map((s) => <span class="chip"><Brand name={s.icon} size={15} />{s.label}</span>)}
-          </div>
-        </div>
-      </div>
+      <div class="t stack"><StackKeys client:visible items={keys} /></div>
     </div>
   </section>
 
@@ -134,20 +135,6 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   </section>
 
   <script>
-    // Floating preview that trails the cursor over the work index (fine pointers only).
-    function index() {
-      const root = document.querySelector<HTMLElement>('[data-index]');
-      const img = root?.querySelector<HTMLImageElement>('.float');
-      if (!root || !img || root.dataset.bound || !matchMedia('(pointer: fine)').matches) return;
-      root.dataset.bound = '1';
-      let x = 0, y = 0, tx = 0, ty = 0, raf = 0;
-      const loop = () => { x += (tx - x) * 0.18; y += (ty - y) * 0.18; img.style.transform = `translate3d(${x}px, ${y}px, 0)`; raf = requestAnimationFrame(loop); };
-      root.querySelectorAll<HTMLAnchorElement>('a[data-preview]').forEach((a) => {
-        a.addEventListener('pointerenter', () => { img.src = a.dataset.preview!; img.classList.add('on'); });
-        a.addEventListener('pointerleave', () => img.classList.remove('on'));
-      });
-      root.addEventListener('pointermove', (e) => { tx = e.clientX + 28; ty = e.clientY - 100; if (!raf) loop(); });
-    }
     // One spotlight across the bento grid.
     function spot() {
       const g = document.querySelector<HTMLElement>('[data-spotlight]');
@@ -161,7 +148,7 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
         }
       });
     }
-    const init = () => { index(); spot(); };
+    const init = () => { spot(); };
     init();
     document.addEventListener('astro:page-load', init);
   </script>
@@ -222,11 +209,20 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   .ask :global(h2) { font-size: 1.125rem !important; }
   .now .big { font-size: 1rem; color: var(--ink); margin-top: 8px; }
   .now .small { margin-top: auto; }
-  .edu .small:first-of-type { margin-top: auto; }
+  .gpa { margin: auto 0 4px !important; font-size: 2.5rem; font-weight: 600; letter-spacing: -0.05em; color: var(--ink); line-height: 1; }
+  .gpa span { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; color: var(--muted); margin-left: 6px; }
   .xp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
   .xp h3 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
-  .xp ul { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 6px; font-size: 0.8125rem; line-height: 1.55; color: var(--text); }
-  .xp ul li::marker { color: var(--rule-strong); }
+  .path { list-style: none; margin: 6px 0 0; padding: 0; display: grid; }
+  .path li { display: grid; grid-template-columns: 64px 14px 1fr; gap: 10px; align-items: baseline; position: relative; padding: 5px 0; font-size: 0.8125rem; line-height: 1.45; }
+  .path li::before { content: ''; position: absolute; left: 80px; top: 0; bottom: 0; width: 1px; background: var(--rule-strong); }
+  .path li:first-child::before { top: 50%; } .path li:last-child::before { bottom: 50%; }
+  .when { font-size: 0.6875rem; color: var(--muted); }
+  .dot { position: relative; z-index: 1; width: 9px; height: 9px; border-radius: 50%; background: var(--surface); border: 2px solid var(--rule-strong); justify-self: center; transform: translateY(1px); transition: border-color 0.2s, background 0.2s; }
+  .path li:hover .dot { border-color: var(--accent); }
+  .now .dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 20%, transparent); }
+  .now .when { color: var(--accent); }
+  .what { color: var(--ink); }
   .gh :global(svg) { max-width: 100%; }
   .posts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
   .posts a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); font-size: 0.9375rem; letter-spacing: -0.01em; }
