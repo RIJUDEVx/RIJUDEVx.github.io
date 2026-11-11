@@ -1,223 +1,294 @@
 ---
+// Home. A mix of the three drafts:
+//  - Index (C): a first-person statement hero and the work as a numbered index
+//    with a cursor-trailing preview, covering every project equally.
+//  - Bento (B): an "at a glance" grid for everything that isn't a project.
+//  - Editorial (A): restraint, mono section labels, no ornament for its own sake.
+// Phones get iOS grouped lists and cards (see the 760px block at the bottom).
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
-import Banner from '../components/Banner.svelte';
+import Ascii from '../components/Ascii.astro';
 import CutLine from '../components/CutLine.svelte';
 import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
-import Preview from '../components/Preview.svelte';
-import ExperienceToggle from '../components/ExperienceToggle.svelte';
 import Pipeline from '../components/Pipeline.svelte';
 import GitHubGraph from '../components/GitHubGraph.astro';
-import Icon from '../components/Icon.astro';
 import Brand from '../components/Brand.astro';
-import { profile, links, questions, previews, experience, stackIcons, statusLabel, education } from '../data/site';
+import { profile, links, questions, experience, statusLabel, stackIcons, education } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const writing = await getCollection('writing');
 const social = links.filter((l) => l.brand);
+const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
 ---
 <Base page="home" faq={questions}>
   <Intro slot="intro" client:load name={profile.name} />
 
-  <section class="profile" id="top">
-    <div class="banner"><Banner client:visible /></div>
-    <div class="identity">
-      <div class="avatar" aria-hidden="true"><span class="rd">rd</span></div>
-      <div class="who">
-        <h1 transition:name="name">{profile.name}</h1>
-        <div class="icons">
-          <span class="role">{profile.title} · <a href={profile.company.url} target="_blank" rel="noopener">{profile.company.name}</a></span>
-          {social.map((l) => (
-            <a href={l.href} target="_blank" rel="noopener me" aria-label={l.label} title={l.label} data-sound="tap"><Brand name={l.brand!} mono size={17} /></a>
-          ))}
-        </div>
+  <section class="hero" id="top">
+    <Ascii class="portrait" />
+    <div class="copy">
+      <p class="eyebrow mono"><span>{profile.handle}</span><span class="sep">/</span><Clock client:load variant="footer" /></p>
+      <h1>
+        I'm Riju. I build backend platforms, Salesforce tooling and native apps,{' '}
+        <span class="dim">and lead the team behind Selegic CRM.</span>
+      </h1>
+      <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · 4+ years · {work.length} projects</p>
+      <div class="cta">
+        <CopyEmail client:load email={profile.email} big />
+        <a class="pill" href="/resume.pdf" data-sound="tap">Resume</a>
+        <span class="soc">{social.map((l) => <a class="icon" href={l.href} target="_blank" rel="noopener me" aria-label={l.label} data-sound="tap"><Brand name={l.brand!} mono size={16} /></a>)}</span>
       </div>
     </div>
+  </section>
 
-    <p class="meta"><Icon name="pin" />{profile.city}<span class="dot">·</span><Icon name="clock" /><Clock client:load variant="hero" /></p>
-
-    <div class="actions">
-      <CopyEmail client:load email={profile.email} big />
-      <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
-    </div>
-
-    <p class="tagline">{profile.tagline}</p>
-
+  <div class="about-wrap">
     <CutLine client:visible label="Cut along the line to read more">
       <div class="prose" id="about">
-        <p>
-          I'm a backend-focused full-stack engineer with 4+ years at Selegic. I designed and built{' '}
-          <Preview client:visible {...previews.crm} statusText={statusLabel[previews.crm.status].text} tone={statusLabel[previews.crm.status].tone}>Selegic CRM</Preview>{' '}
-          from an empty repo, took it to its first release on my own in five months, and now lead the team that builds it.
-        </p>
-        <p>
-          Along the way I built{' '}
-          <Preview client:visible {...previews.migrata} statusText={statusLabel[previews.migrata.status].text} tone={statusLabel[previews.migrata.status].tone}>Migrata</Preview>, which replaced manual Salesforce CPQ deployments and now lives on AppExchange, and{' '}
-          <Preview client:visible {...previews.internal} statusText={statusLabel[previews.internal.status].text} tone={statusLabel[previews.internal.status].tone}>the platform</Preview>{' '}
-          the whole company tracks its time on. Before that, native iOS apps.
-        </p>
-        <p>I care about systems that stay correct when real people use them: access control, clean data, and releases nobody has to hold their breath for.</p>
+        <p>I started at Selegic as an intern in January 2022, building a Chrome extension and Salesforce admin tools. Since then I've shipped native iOS apps, Migrata on Salesforce AppExchange, the company's time-tracking platform, and Selegic CRM, which I designed and now lead.</p>
+        <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
         <p class="mono muted">{profile.workModes}</p>
       </div>
     </CutLine>
-  </section>
+  </div>
 
-  <section class="section" id="ask">
-    <Questions client:visible questions={questions} />
-  </section>
-
-  <section class="section" id="experience">
-    <div class="section-head"><h2>Experience</h2></div>
-    <ExperienceToggle client:visible {...experience} />
-  </section>
-
-  <section class="section" id="work">
-    <div class="section-head"><h2>Projects</h2><a class="mono muted" href="/work/selegic-crm">case studies →</a></div>
-    <ol class="work">
-      {work.map((w) => (
+  <section class="index" id="work" data-index>
+    <div class="label-row"><h2 class="label mono">Work</h2><span class="mono muted">{work.length} projects · 2022 – now</span></div>
+    <div class="ih mono" aria-hidden="true"><span></span><span>Project</span><span>Area</span><span>Status</span><span>Year</span></div>
+    <ol>
+      {work.map((w, i) => (
         <li>
-          <a href={`/work/${w.id}`} class="card" data-sound="tap" data-cursor="open">
-            <div class="card-top">
-              <h3 transition:name={`title-${w.id}`}>{w.data.title}</h3>
-              <span class="badge" data-tone={statusLabel[w.data.status].tone}>{statusLabel[w.data.status].text}</span>
-            </div>
-            <p>{w.data.summary}</p>
-            {w.data.stats.length > 0 && (
-              <dl class="stats">{w.data.stats.slice(0, 2).map((s) => <div><dt>{s.value}</dt><dd class="mono muted">{s.label}</dd></div>)}</dl>
-            )}
-            <ul class="tags">{w.data.stack.slice(0, 4).map((t) => <li class="mono">{t}</li>)}</ul>
+          <a href={`/work/${w.id}`} data-preview={`/og/work/${w.id}.png`} data-cursor="open" data-sound="tap">
+            <span class="mono n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="ttl" transition:name={`title-${w.id}`}>{w.data.title}</span>
+            <span class="area">{w.data.area}</span>
+            <span class="mono st" data-tone={statusLabel[w.data.status].tone}>{statusLabel[w.data.status].text}</span>
+            <span class="mono yr">{year(w.data.years)}</span>
+            <span class="sum">{w.data.summary}</span>
           </a>
         </li>
       ))}
     </ol>
+    <img class="float" alt="" aria-hidden="true" width="1200" height="630" />
   </section>
 
-  <section class="section" id="pipeline">
-    <div class="section-head"><h2>Try the thing I build</h2></div>
-    <p class="muted lead">A tiny CRM pipeline. Drag a deal to the next stage and close it.</p>
+  <section class="glance" id="glance" data-spotlight>
+    <h2 class="label mono">At a glance</h2>
+    <div class="grid">
+      <div class="t ask" id="ask"><Questions client:visible questions={questions} /></div>
+
+      <div class="t now">
+        <span class="k mono">Now</span>
+        <p class="big"><Clock client:load variant="hero" /></p>
+        <p class="small muted">Leading the Selegic CRM team. Writing about how we ship.</p>
+      </div>
+
+      <div class="t edu">
+        <span class="k mono">Education</span>
+        <p class="small ink">B.Tech, Computer Science</p>
+        <p class="small muted">MAKAUT · {education.years}</p>
+      </div>
+
+      <div class="t xp" id="experience">
+        <div class="xp-head"><span class="k mono">Experience</span><span class="mono muted small">{experience.dates}</span></div>
+        <h3>{experience.role} <span class="muted">· {experience.company}</span></h3>
+        <ul>{experience.long.map((l) => <li>{l}</li>)}</ul>
+      </div>
+
+      <div class="t gh"><GitHubGraph user="RIJUDEVx" /></div>
+
+      <div class="t writing">
+        <div class="xp-head"><span class="k mono">Writing</span><span class="mono muted small">drafts</span></div>
+        <ul class="posts">
+          {writing.map((p) => (
+            <li><a href={`/writing/${p.id}`} data-sound="tap"><span class="pt">{p.data.title}</span><span class="badge">Draft</span></a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="t stack">
+        <span class="k mono">Stack I reach for</span>
+        <div class="marquee" aria-label="Tech stack">
+          <div class="track">
+            {[...stackIcons, ...stackIcons].map((s) => <span class="chip"><Brand name={s.icon} size={15} />{s.label}</span>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="play" id="pipeline">
+    <div class="label-row"><h2 class="label mono">Playground</h2><span class="mono muted">a toy version of what I build</span></div>
+    <p class="play-lead">Drag a deal to the next stage and close it.</p>
     <Pipeline client:visible />
   </section>
 
-  <section class="section" id="activity">
-    <GitHubGraph user="RIJUDEVx" />
-  </section>
-
-  <section class="section" id="education">
-    <div class="section-head"><h2>Education</h2></div>
-    <div class="edu">
-      <div class="edu-head"><h3>{education.school}</h3><span class="mono muted">{education.years}</span></div>
-      <p class="mono muted">{education.degree} · CGPA {education.cgpa}</p>
-    </div>
-  </section>
-
-  <section class="section" id="skills">
-    <div class="section-head"><h2>Skills</h2></div>
-    <ul class="skills">
-      {stackIcons.map((s) => <li><Brand name={s.icon} size={16} />{s.label}</li>)}
-    </ul>
-  </section>
-
-  <section class="section" id="contact">
-    <div class="section-head"><h2>Say hi</h2></div>
-    <p class="lead-big">Building something that needs a backend owned end to end? I'd like to hear about it.</p>
-    <div class="actions">
+  <section class="contact" id="contact">
+    <h2 class="label mono">Contact</h2>
+    <p class="statement">Building something that needs a backend owned end to end?{' '}<span class="dim">I'd like to hear about it.</span></p>
+    <div class="cta">
       <CopyEmail client:visible email={profile.email} big />
-      <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={15} />LinkedIn</a>
+      <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={14} />LinkedIn</a>
     </div>
   </section>
+
+  <script>
+    // Floating preview that trails the cursor over the work index (fine pointers only).
+    function index() {
+      const root = document.querySelector<HTMLElement>('[data-index]');
+      const img = root?.querySelector<HTMLImageElement>('.float');
+      if (!root || !img || root.dataset.bound || !matchMedia('(pointer: fine)').matches) return;
+      root.dataset.bound = '1';
+      let x = 0, y = 0, tx = 0, ty = 0, raf = 0;
+      const loop = () => { x += (tx - x) * 0.18; y += (ty - y) * 0.18; img.style.transform = `translate3d(${x}px, ${y}px, 0)`; raf = requestAnimationFrame(loop); };
+      root.querySelectorAll<HTMLAnchorElement>('a[data-preview]').forEach((a) => {
+        a.addEventListener('pointerenter', () => { img.src = a.dataset.preview!; img.classList.add('on'); });
+        a.addEventListener('pointerleave', () => img.classList.remove('on'));
+      });
+      root.addEventListener('pointermove', (e) => { tx = e.clientX + 28; ty = e.clientY - 100; if (!raf) loop(); });
+    }
+    // One spotlight across the bento grid.
+    function spot() {
+      const g = document.querySelector<HTMLElement>('[data-spotlight]');
+      if (!g || g.dataset.bound || !matchMedia('(pointer: fine)').matches) return;
+      g.dataset.bound = '1';
+      g.addEventListener('pointermove', (e) => {
+        for (const t of g.querySelectorAll<HTMLElement>('.t')) {
+          const r = t.getBoundingClientRect();
+          t.style.setProperty('--x', `${e.clientX - r.left}px`);
+          t.style.setProperty('--y', `${e.clientY - r.top}px`);
+        }
+      });
+    }
+    const init = () => { index(); spot(); };
+    init();
+    document.addEventListener('astro:page-load', init);
+  </script>
 </Base>
 
 <style>
-  .profile { padding: 0 var(--gutter) 8px; }
-  .banner { height: 144px; margin: 0 calc(-1 * var(--gutter)); position: relative; overflow: hidden; }
-  .banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, var(--paper)); pointer-events: none; }
+  :global(.page) { max-width: 1120px !important; }
+  .label { font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .label-row .mono { font-size: 0.6875rem; }
+  .dim { color: var(--muted); }
+  .ink { color: var(--ink); }
+  .small { font-size: 0.8125rem; }
 
-  .identity { display: flex; gap: 20px; align-items: flex-end; margin-top: -40px; position: relative; }
-  .avatar {
-    flex: none; width: 104px; height: 104px; border-radius: 24px;
-    background: var(--surface); color: var(--ink); display: grid; place-items: center;
-    font-size: 3.4rem; border: 1px solid var(--rule-strong);
-    box-shadow: 0 0 0 4px var(--paper), var(--shadow);
-    transform: rotate(-3deg); transition: transform 0.4s var(--ease);
+  /* Hero */
+  .hero { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center; padding: 112px 24px 32px; }
+  .portrait :global(pre) { font-size: 7px; }
+  .eyebrow { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 0.75rem; margin: 0; }
+  .sep { opacity: 0.4; }
+  h1 { margin-top: 22px; font-size: clamp(2rem, 3.8vw, 3.1rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 20ch; }
+  .sub { margin: 18px 0 0; color: var(--text); font-size: 0.9375rem; }
+  .sub a { color: var(--ink); text-decoration-color: var(--rule-strong); }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 26px; }
+  .soc { display: contents; }
+  .icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
+  .icon:hover { color: var(--ink); border-color: var(--rule-strong); }
+  .about-wrap { padding: 8px 24px 0; max-width: 760px; }
+  .prose p { color: var(--text); line-height: 1.75; margin: 0 0 14px; }
+
+  /* Work index */
+  .index { position: relative; padding: 88px 24px 0; }
+  .ih { display: grid; grid-template-columns: 48px 1fr 170px 150px 110px; padding-bottom: 10px; color: var(--muted); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--rule); }
+  ol { list-style: none; margin: 0; padding: 0; }
+  li a { display: grid; grid-template-columns: 48px 1fr 170px 150px 110px; align-items: baseline; row-gap: 4px; padding: 18px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); transition: color 0.2s, padding 0.3s var(--ease); }
+  .n, .yr { color: var(--muted); font-size: 0.75rem; }
+  .ttl { font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 500; letter-spacing: -0.035em; line-height: 1.1; }
+  .area { font-size: 0.875rem; color: var(--text); }
+  .st { font-size: 0.75rem; color: var(--muted); }
+  .st[data-tone='ok'] { color: var(--ok); } .st[data-tone='pilot'] { color: var(--accent); }
+  .sum { grid-column: 2 / 5; color: var(--muted); font-size: 0.875rem; max-width: 60ch; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.35s var(--ease), opacity 0.25s; }
+  ol:hover li a { color: var(--muted); }
+  ol li a:hover, ol li a:focus-visible { color: var(--ink); padding-left: 8px; }
+  ol li a:hover .sum, ol li a:focus-visible .sum { max-height: 4em; opacity: 1; }
+  .float { position: fixed; left: 0; top: 0; width: 300px; height: auto; border-radius: 12px; pointer-events: none; z-index: 40; opacity: 0; scale: 0.92; transition: opacity 0.2s, scale 0.3s var(--ease); box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.6); }
+  .float:global(.on) { opacity: 1; scale: 1; }
+
+  /* At a glance (bento) */
+  .glance { padding: 96px 24px 0; }
+  .glance > .label { margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .t { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px; padding: 22px; border-radius: 20px; background: var(--surface); border: 1px solid var(--rule); }
+  .t::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(340px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklab, var(--accent) 9%, transparent), transparent 60%); }
+  .grid:hover .t::before { opacity: 1; }
+  .t > * { position: relative; }
+  .k { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .t p { margin: 0; }
+  .ask, .xp, .gh, .writing, .stack { grid-column: span 2; }
+  .ask :global(h2) { font-size: 1.125rem !important; }
+  .now .big { font-size: 1rem; color: var(--ink); margin-top: 8px; }
+  .now .small { margin-top: auto; }
+  .edu .small:first-of-type { margin-top: auto; }
+  .xp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .xp h3 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+  .xp ul { margin: 4px 0 0; padding-left: 16px; display: grid; gap: 6px; font-size: 0.8125rem; line-height: 1.55; color: var(--text); }
+  .xp ul li::marker { color: var(--rule-strong); }
+  .gh :global(svg) { max-width: 100%; }
+  .posts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+  .posts a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); font-size: 0.9375rem; letter-spacing: -0.01em; }
+  .posts li:last-child a { border-bottom: 0; }
+  .posts a:hover .pt { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+  .marquee { overflow: hidden; margin: auto -22px 0; mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .track { display: flex; gap: 8px; width: max-content; animation: slide 40s linear infinite; padding: 6px 0; }
+  .stack:hover .track { animation-play-state: paused; }
+  @keyframes slide { to { transform: translateX(-50%); } }
+  .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--paper); font-size: 0.8125rem; color: var(--ink); white-space: nowrap; }
+
+  .play { padding: 96px 24px 0; }
+  .play-lead { margin: -8px 0 18px; color: var(--muted); font-size: 0.875rem; }
+  .contact { padding: 96px 24px 72px; display: grid; gap: 16px; }
+  .statement { margin: 0; font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 500; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); max-width: 24ch; }
+
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 96px; }
+    .portrait :global(pre) { font-size: 5.4px; }
+    .ih { display: none; }
+    li a { grid-template-columns: 40px 1fr auto; }
+    .area, .yr { display: none; }
+    .sum { grid-column: 2 / 4; max-height: none; opacity: 1; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
   }
-  .avatar:hover { transform: rotate(0deg) scale(1.03); }
-  .avatar .rd { transform: translateY(-3px); }
-  h1 { font-size: 2.25rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; }
-  .icons { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 6px; color: var(--text); }
-  .icons a { color: var(--text); display: inline-flex; transition: color 0.2s, transform 0.2s var(--ease); }
-  .icons a:hover { color: var(--ink); transform: translateY(-1px); }
-  .role { font-size: 0.9375rem; }
-  .role a { text-decoration: none; color: var(--ink); }
 
-  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 18px 0 0; font-size: 0.875rem; color: var(--muted); }
-  .meta :global(svg) { width: 14px; height: 14px; }
-  .dot { margin: 0 4px; }
-  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
-  .tagline { margin: 28px 0 12px; font-size: 1rem; color: var(--ink); }
-
-  .prose { padding-top: 8px; }
-  .prose p { margin: 0 0 14px; font-size: 0.9375rem; line-height: 1.7; }
-
-  .work { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .card { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 18px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); text-decoration: none; transition: border-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s; }
-  .card:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
-  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .card h3 { font-size: 1.0625rem; font-weight: 600; }
-  .card p { margin: 0; font-size: 0.8125rem; line-height: 1.55; color: var(--muted); }
-  .stats { display: flex; gap: 20px; margin: 2px 0 0; }
-  .stats dt { font-size: 1.125rem; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; }
-  .stats dd { margin: 0; font-size: 0.6875rem; }
-  .tags { list-style: none; padding: 0; margin: auto 0 0; display: flex; flex-wrap: wrap; gap: 4px; }
-  .tags li { font-size: 0.6875rem; padding: 1px 7px; border-radius: 6px; background: var(--rule); color: var(--text); }
-
-  .lead { margin: -12px 0 20px; font-size: 0.875rem; }
-  .edu-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-  .edu h3 { font-size: 1.0625rem; font-weight: 600; }
-  .edu p { margin: 4px 0 0; }
-  .skills { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .skills li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 0.8125rem; color: var(--ink); }
-  .lead-big { font-size: 1.25rem; color: var(--ink); margin: 0 0 20px; letter-spacing: -0.015em; }
-
-  @media (max-width: 640px) {
-    .banner { height: 120px; }
-    .identity { flex-direction: column; align-items: flex-start; gap: 14px; }
-    .avatar { width: 88px; height: 88px; font-size: 2.9rem; border-radius: 20px; }
-    h1 { font-size: 1.875rem; }
-    .work { grid-template-columns: 1fr; }
-  }
-
-  /* iOS app look on phones: inset grouped lists and native-feeling controls. */
+  /* Phones: iOS grouped lists and cards, system font and colours come from global.css. */
   @media (max-width: 760px) {
-    .profile { padding: 0 16px 4px; }
-    .identity { margin-top: -36px; }
-    h1 { font-size: 2.125rem; font-weight: 700; letter-spacing: -0.03em; }
-    .icons { gap: 16px; }
-    .role { width: 100%; font-size: 0.9375rem; color: var(--muted); }
-    .icons > a { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgb(127 127 127 / 0.14); color: var(--ink); }
-    .role a { color: var(--ink); }
-    .meta .dot { display: none; }
-    .actions { gap: 8px; }
-    .actions :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
-    .tagline { font-size: 1.0625rem; line-height: 1.45; }
-    .prose p { font-size: 1rem; }
+    .hero { padding: 72px 16px 8px; justify-items: center; text-align: center; }
+    .portrait :global(pre) { font-size: 4.6px; }
+    .eyebrow { justify-content: center; }
+    h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.03em; margin-inline: auto; }
+    .sub { font-size: 0.9375rem; color: var(--muted); }
+    .cta { justify-content: center; gap: 8px; }
+    .soc { display: flex; flex-basis: 100%; justify-content: center; gap: 10px; margin-top: 4px; }
+    .cta :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
+    .icon { width: 36px; height: 36px; border: 0; background: rgb(127 127 127 / 0.14); color: var(--ink); }
+    .about-wrap { padding: 8px 16px 0; }
 
-    /* Projects: one grouped list, rows with a chevron, like Settings. */
-    .work { gap: 0; border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-    .work li + li .card { border-top: 0.5px solid var(--rule-strong); }
-    .card { border: 0; border-radius: 0; padding: 14px 40px 14px 16px; position: relative; gap: 6px; background: transparent; }
-    .card::after { content: ''; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--rule-strong); border-top: 2px solid var(--rule-strong); transform: translateY(-50%) rotate(45deg); }
-    .card:hover { transform: none; box-shadow: none; }
-    .card:active { background: rgb(127 127 127 / 0.12); }
-    .card h3 { font-size: 1.0625rem; }
-    .card p { font-size: 0.875rem; }
-    .tags { display: none; }
+    .index, .glance, .play { padding: 40px 16px 0; }
+    .label { font-size: 0.8125rem; letter-spacing: 0.02em; text-transform: none; color: var(--muted); padding-left: 16px; }
+    .label-row .mono { display: none; }
+    ol { background: var(--surface); border-radius: 20px; overflow: hidden; }
+    li a { grid-template-columns: 1fr auto; padding: 14px 40px 14px 16px; position: relative; border-bottom: 0.5px solid var(--rule-strong); }
+    li:last-child a { border-bottom: 0; }
+    li a::after { content: ''; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--rule-strong); border-top: 2px solid var(--rule-strong); transform: translateY(-50%) rotate(45deg); }
+    li a:active { background: rgb(127 127 127 / 0.12); }
+    ol:hover li a { color: var(--ink); }
+    ol li a:hover { padding-left: 16px; }
+    .n { display: none; }
+    .ttl { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; }
+    .st { font-family: var(--font-sans); font-size: 0.8125rem; }
+    .sum { grid-column: 1 / 3; font-size: 0.875rem; }
+    .float { display: none; }
 
-    .edu, .skills { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; }
-    .skills li { border: 0; background: rgb(127 127 127 / 0.12); }
-    .lead-big { font-size: 1.25rem; font-weight: 600; }
-    #contact .actions { display: grid; grid-template-columns: 1fr; }
-    #contact .actions > :global(*) { justify-content: center; }
+    .grid { grid-template-columns: 1fr; gap: 12px; }
+    .ask, .xp, .gh, .writing, .stack { grid-column: auto; }
+    .t { border: 0; border-radius: 20px; padding: 16px; }
+    .k { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-size: 0.8125rem; font-weight: 600; }
+    .contact { padding: 40px 16px 32px; }
+    .contact .cta { display: grid; grid-template-columns: 1fr; }
+    .contact .cta > :global(*) { justify-content: center; }
+    .statement { font-size: 1.5rem; font-weight: 700; }
   }
 </style>

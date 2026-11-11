@@ -20,7 +20,7 @@
   // Sections that belong to a tab, so the bubble stays on the right tab while reading.
   const owner: Record<string, string> = {
     top: 'top', about: 'top', ask: 'top', experience: 'work', work: 'work',
-    pipeline: 'pipeline', activity: 'pipeline', education: 'contact', skills: 'contact', contact: 'contact',
+    pipeline: 'pipeline', activity: 'pipeline', glance: 'work', education: 'contact', skills: 'contact', contact: 'contact',
   };
 
   const page = createPageState();

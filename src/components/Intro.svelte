@@ -128,12 +128,12 @@
 >
   {#key run}
     <div class="stage">
-      <h1 class="name">
+      <p class="name" role="presentation">
         <span class="sr-only">{name}</span>
         {#each words as word}
           <span class="word" aria-hidden="true">{#each word as l}<span class="ch" style:--i={l.i}>{l.ch}</span>{/each}</span>
         {/each}
-      </h1>
+      </p>
       <p class="caption mono">senior software engineer · kolkata</p>
     </div>
     <div class="bar" aria-hidden="true"></div>
@@ -169,7 +169,7 @@
 
   .stage { padding: 0 var(--gutter); text-align: center; }
   .name {
-    margin: 0; font-family: var(--font-sans); font-weight: 500;
+    margin: 0; color: var(--ink); font-family: var(--font-sans); font-weight: 500;
     font-size: clamp(2.75rem, 10vw, 7.5rem); line-height: 1; letter-spacing: -0.045em;
     color: var(--ink); max-width: 92vw;
   }

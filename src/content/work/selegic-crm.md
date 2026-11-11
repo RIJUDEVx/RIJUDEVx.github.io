@@ -1,4 +1,5 @@
 ---
+area: "SaaS platform"
 title: "Selegic CRM"
 order: 1
 summary: "A multi-tenant CRM platform. I designed it, built v1 on my own and now lead the team that builds it."

@@ -1,4 +1,5 @@
 ---
+area: "Internal tools"
 title: "Selegic Internal"
 order: 3
 summary: "The company's time-tracking and project platform, built end to end."

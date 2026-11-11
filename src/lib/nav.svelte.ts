@@ -7,7 +7,7 @@ import { profile } from '../data/site';
 
 export const navItems = [
   { id: 'work', label: 'Work', href: '/#work' },
-  { id: 'experience', label: 'Experience', href: '/#experience' },
+  { id: 'glance', label: 'Experience', href: '/#experience' },
   { id: 'pipeline', label: 'Playground', href: '/#pipeline' },
   { id: 'contact', label: 'Contact', href: '/#contact' },
 ] as const;
@@ -16,7 +16,7 @@ export const handle = profile.handle;
 
 const sectionLabel: Record<string, string> = {
   top: 'Home', about: 'About', ask: 'Before you hire me', experience: 'Experience', work: 'Projects',
-  pipeline: 'Playground', activity: 'Activity', education: 'Education', skills: 'Skills', contact: 'Contact',
+  pipeline: 'Playground', activity: 'Activity', glance: 'At a glance', education: 'Education', skills: 'Skills', contact: 'Contact',
 };
 
 export const reducedMotion = () =>

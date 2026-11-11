@@ -1,4 +1,5 @@
 ---
+area: "Service"
 title: "Doc Gen"
 order: 4
 summary: "A service that turns templates into DOCX and PDF documents. I worked on its infrastructure, deployment and CPQ terms rendering."
