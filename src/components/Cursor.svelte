@@ -49,7 +49,7 @@
       hiddenForField = !!field && (field.tagName === 'TEXTAREA' || TEXT_TYPES.has((field as HTMLInputElement).type));
       hot = !hiddenForField && !!t.closest(HOT);
       const lbl = t.closest<HTMLElement>('[data-cursor]')?.dataset.cursor ?? '';
-      label = lbl === 'true' ? '' : lbl;
+      label = lbl === 'true' || lbl === 'none' ? '' : lbl;
     };
 
     const onMouseOut = (e: MouseEvent) => {

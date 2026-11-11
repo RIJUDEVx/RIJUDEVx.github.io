@@ -27,19 +27,15 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <Seo title={fullTitle} description={description} page={page} faq={faq} work={work} video={video} />
     <script is:inline>
       // Set the theme before first paint so there's no flash.
       (function () {
         var t = null;
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
-        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        if (!t) t = 'dark'; // dark by default; the toggle remembers a choice
         document.documentElement.dataset.theme = t;
-        // Nav design under review: ?nav=pill|island|rail|classic, remembered in localStorage.
-        var nav = new URLSearchParams(location.search).get('nav');
-        try { if (nav) localStorage.setItem('rd:nav', nav); else nav = localStorage.getItem('rd:nav'); } catch (e) {}
-        document.documentElement.dataset.nav = /^(pill|island|rail|classic)$/.test(nav || '') ? nav : 'pill';
         // First visit this session on the home page: Intro.svelte plays.
         var seen = null;
         try { seen = sessionStorage.getItem('rd:intro'); } catch (e) {}
@@ -51,9 +47,6 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
         var t = null;
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
         if (t) document.documentElement.dataset.theme = t;
-        var n = null;
-        try { n = localStorage.getItem('rd:nav'); } catch (e) {}
-        if (n) document.documentElement.dataset.nav = n;
       });
     </script>
     <script is:inline>

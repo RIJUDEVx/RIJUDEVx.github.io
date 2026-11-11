@@ -1,5 +1,6 @@
 @import '@fontsource-variable/inter';
 @import '@fontsource-variable/roboto-mono';
+@import '@fontsource/instrument-serif/400.css';
 
 :root {
   --paper: #faf9f5;
@@ -19,6 +20,7 @@
   --font-sans: 'Inter Variable', system-ui, sans-serif;
   --font-mono: 'Roboto Mono Variable', ui-monospace, monospace;
   --font-display: 'Inter Variable', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif; /* only for the rd monogram */
 
   --col: 720px;
   --gutter: 24px;
@@ -65,6 +67,7 @@ button { font: inherit; color: inherit; }
 
 h1, h2, h3 { color: var(--ink); font-weight: 500; margin: 0; }
 .display { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.025em; line-height: 1.2; }
+.rd { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; line-height: 1; }
 .mono { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; }
 .muted { color: var(--muted); }
 
@@ -110,4 +113,30 @@ h1, h2, h3 { color: var(--ink); font-weight: 500; margin: 0; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ───────── Phones: the site behaves like an iOS app (≤760px) ─────────
+   System font (SF Pro on Apple devices), iOS system colours, pure black in dark,
+   grouped surfaces, and room at the bottom for the floating tab bar. */
+@media (max-width: 760px) {
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter Variable', system-ui, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter Variable', system-ui, sans-serif;
+    --paper: #f2f2f7; --surface: #ffffff; --ink: #000000; --text: #3c3c43; --muted: #8e8e93;
+    --rule: #e5e5ea; --rule-strong: #d1d1d6; --accent: #007aff; --ok: #34c759; --warn: #ff9f0a; --danger: #ff3b30;
+    --radius: 20px;
+  }
+  :root[data-theme='dark'] {
+    --paper: #000000; --surface: #1c1c1e; --ink: #ffffff; --text: #d1d1d6; --muted: #8e8e93;
+    --rule: #2c2c2e; --rule-strong: #3a3a3c; --accent: #0a84ff; --ok: #30d158; --warn: #ff9f0a; --danger: #ff453a;
+  }
+  body { -webkit-tap-highlight-color: transparent; }
+  .section { padding: 28px 16px; }
+  .section-head { margin-bottom: 12px; }
+  .section-head h2 { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; }
+  .pill { border-radius: 999px; padding: 9px 16px; font-weight: 600; border-color: transparent; background: rgb(127 127 127 / 0.14); }
+  .pill:hover { transform: none; border-color: transparent; }
+  .pill:active { transform: scale(0.97); opacity: 0.8; }
+  .badge { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 0.75rem; }
+  .site-footer { padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important; }
 }

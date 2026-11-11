@@ -1,24 +1,7 @@
 ---
-// Four nav designs, rendered side by side while Riju picks one.
-// The inline script in Base.astro sets <html data-nav="…"> before first paint
-// (from ?nav=… or localStorage 'rd:nav'), and CSS shows only that variant.
-// Once one is chosen, delete the others and this switch.
-import HeaderClassic from './nav/HeaderClassic.astro';
-import NavPill from './nav/NavPill.svelte';
+// Desktop: the dynamic island. Phones (≤760px): an iOS-style glass nav bar and tab bar.
 import NavIsland from './nav/NavIsland.svelte';
-import NavRail from './nav/NavRail.svelte';
-import NavSwitcher from './nav/NavSwitcher.svelte';
+import MobileBar from './nav/MobileBar.svelte';
 ---
-<div class="nav-v" data-v="classic"><HeaderClassic /></div>
-<div class="nav-v" data-v="pill" transition:persist="nav-pill"><NavPill client:load /></div>
-<div class="nav-v" data-v="island" transition:persist="nav-island"><NavIsland client:load /></div>
-<div class="nav-v" data-v="rail" transition:persist="nav-rail"><NavRail client:load /></div>
-<NavSwitcher client:idle transition:persist="nav-switch" />
-
-<style is:global>
-  .nav-v { display: none; }
-  html[data-nav='classic'] .nav-v[data-v='classic'],
-  html[data-nav='pill'] .nav-v[data-v='pill'],
-  html[data-nav='island'] .nav-v[data-v='island'],
-  html[data-nav='rail'] .nav-v[data-v='rail'] { display: contents; }
-</style>
+<div transition:persist="nav-island"><NavIsland client:load /></div>
+<div transition:persist="nav-mobile"><MobileBar client:load /></div>

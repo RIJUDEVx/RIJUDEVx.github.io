@@ -21,10 +21,10 @@ const social = links.filter((l) => l.brand);
 <Base page="home" faq={questions}>
   <Intro slot="intro" client:load name={profile.name} />
 
-  <section class="profile">
+  <section class="profile" id="top">
     <div class="banner"><Banner client:visible /></div>
     <div class="identity">
-      <div class="avatar" aria-hidden="true"><span>rd</span></div>
+      <div class="avatar" aria-hidden="true"><span class="rd">rd</span></div>
       <div class="who">
         <h1 transition:name="name">{profile.name}</h1>
         <div class="icons">
@@ -41,7 +41,6 @@ const social = links.filter((l) => l.brand);
     <div class="actions">
       <CopyEmail client:load email={profile.email} big />
       <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
-      <span class="badge" data-tone="ok">{profile.availability}</span>
     </div>
 
     <p class="tagline">{profile.tagline}</p>
@@ -122,7 +121,7 @@ const social = links.filter((l) => l.brand);
 
   <section class="section" id="contact">
     <div class="section-head"><h2>Say hi</h2></div>
-    <p class="lead-big">Hiring a team lead, or need someone to own a backend end to end? I'd like to hear about it.</p>
+    <p class="lead-big">Building something that needs a backend owned end to end? I'd like to hear about it.</p>
     <div class="actions">
       <CopyEmail client:visible email={profile.email} big />
       <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={15} />LinkedIn</a>
@@ -137,11 +136,14 @@ const social = links.filter((l) => l.brand);
 
   .identity { display: flex; gap: 20px; align-items: flex-end; margin-top: -40px; position: relative; }
   .avatar {
-    flex: none; width: 104px; height: 104px; border-radius: 16px;
-    background: var(--ink); color: var(--paper); display: grid; place-items: center;
-    font-size: 2.75rem; font-weight: 600; letter-spacing: -0.06em;
-    box-shadow: 0 0 0 4px var(--paper);
+    flex: none; width: 104px; height: 104px; border-radius: 24px;
+    background: var(--surface); color: var(--ink); display: grid; place-items: center;
+    font-size: 3.4rem; border: 1px solid var(--rule-strong);
+    box-shadow: 0 0 0 4px var(--paper), var(--shadow);
+    transform: rotate(-3deg); transition: transform 0.4s var(--ease);
   }
+  .avatar:hover { transform: rotate(0deg) scale(1.03); }
+  .avatar .rd { transform: translateY(-3px); }
   h1 { font-size: 2.25rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; }
   .icons { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 6px; color: var(--text); }
   .icons a { color: var(--text); display: inline-flex; transition: color 0.2s, transform 0.2s var(--ease); }
@@ -181,8 +183,41 @@ const social = links.filter((l) => l.brand);
   @media (max-width: 640px) {
     .banner { height: 120px; }
     .identity { flex-direction: column; align-items: flex-start; gap: 14px; }
-    .avatar { width: 88px; height: 88px; font-size: 2.25rem; }
+    .avatar { width: 88px; height: 88px; font-size: 2.9rem; border-radius: 20px; }
     h1 { font-size: 1.875rem; }
     .work { grid-template-columns: 1fr; }
+  }
+
+  /* iOS app look on phones: inset grouped lists and native-feeling controls. */
+  @media (max-width: 760px) {
+    .profile { padding: 0 16px 4px; }
+    .identity { margin-top: -36px; }
+    h1 { font-size: 2.125rem; font-weight: 700; letter-spacing: -0.03em; }
+    .icons { gap: 16px; }
+    .role { width: 100%; font-size: 0.9375rem; color: var(--muted); }
+    .icons > a { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: rgb(127 127 127 / 0.14); color: var(--ink); }
+    .role a { color: var(--ink); }
+    .meta .dot { display: none; }
+    .actions { gap: 8px; }
+    .actions :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
+    .tagline { font-size: 1.0625rem; line-height: 1.45; }
+    .prose p { font-size: 1rem; }
+
+    /* Projects: one grouped list, rows with a chevron, like Settings. */
+    .work { gap: 0; border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+    .work li + li .card { border-top: 0.5px solid var(--rule-strong); }
+    .card { border: 0; border-radius: 0; padding: 14px 40px 14px 16px; position: relative; gap: 6px; background: transparent; }
+    .card::after { content: ''; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--rule-strong); border-top: 2px solid var(--rule-strong); transform: translateY(-50%) rotate(45deg); }
+    .card:hover { transform: none; box-shadow: none; }
+    .card:active { background: rgb(127 127 127 / 0.12); }
+    .card h3 { font-size: 1.0625rem; }
+    .card p { font-size: 0.875rem; }
+    .tags { display: none; }
+
+    .edu, .skills { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; }
+    .skills li { border: 0; background: rgb(127 127 127 / 0.12); }
+    .lead-big { font-size: 1.25rem; font-weight: 600; }
+    #contact .actions { display: grid; grid-template-columns: 1fr; }
+    #contact .actions > :global(*) { justify-content: center; }
   }
 </style>

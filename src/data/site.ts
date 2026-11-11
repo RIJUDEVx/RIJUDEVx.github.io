@@ -12,7 +12,6 @@ export const profile = {
   city: 'Kolkata, India',
   timezone: 'Asia/Kolkata',
   email: 'rijudev12@gmail.com',
-  availability: 'Open to team lead roles',
   workModes: 'Kolkata or Bengaluru · on-site, hybrid or remote',
 };
 
