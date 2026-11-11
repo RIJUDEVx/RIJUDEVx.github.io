@@ -40,7 +40,7 @@
   const tickers = $derived([
     `${time} in Kolkata`,
     'Building Selegic CRM',
-    `${profile.title}`,
+    profile.name,
   ]);
 
   function updateTime() {
@@ -165,7 +165,7 @@
           <span class="tile rd" aria-hidden="true">rd</span>
           <div class="id">
             <a class="name" href="/" data-sound="tap">{profile.name}</a>
-            <span class="st"><span class="live" aria-hidden="true"></span>{profile.title} · Selegic</span>
+            <span class="st"><span class="live" aria-hidden="true"></span>Kolkata, India</span>
           </div>
         </div>
         <p class="meta mono">{profile.city.split(',')[0]} · {time} · {status}</p>

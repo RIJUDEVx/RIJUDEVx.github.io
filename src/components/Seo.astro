@@ -21,7 +21,7 @@ const origin = site.origin;
 const canonical = new URL(Astro.url.pathname, site);
 const w = page === 'work' ? work : undefined;
 // The tab title is the GitHub handle; link previews keep the full name so people know whose card it is.
-const shareTitle = w ? `${w.title} · Riju Dev Purkayastha` : 'Riju Dev Purkayastha · Senior Software Engineer';
+const shareTitle = w ? `${w.title} · Riju Dev Purkayastha` : 'Riju Dev Purkayastha';
 
 const ogImage = new URL(w ? `/og/work/${w.slug}.png` : '/og/home.png', site).href;
 const ogAlt = w

@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { profile, statusLabel, type Status } from '../data/site';
+import { portrait } from '../data/portrait';
 
 // Colour tokens from src/styles/global.css (dark theme).
 export const colors = {
@@ -113,18 +114,33 @@ function frame(body: Node[]): Node {
   );
 }
 
-// Home card: name, role, tagline and the rd monogram.
+// Home card, after the reference portfolios (Krishna's drawing of himself, Kislay's
+// photo card): the ASCII portrait fills the right half, the name sits on the left.
+// Name only, no designation.
 export function homeCard(): Node {
-  const monogram = mark({ size: 200, radius: 44, fontSize: 96, bg: colors.paper, fg: colors.ink });
-  const copy = el('div', { flexDirection: 'column', width: 820, justifyContent: 'center' }, [
-    el('div', { fontWeight: 500, fontSize: 84, color: colors.paper, letterSpacing: -3.4, lineHeight: 1.05 }, profile.name),
-    el('div', { fontWeight: 500, fontSize: 32, color: colors.text, letterSpacing: -0.6, marginTop: 28 }, `${profile.title} · Kolkata`),
-    el('div', { fontWeight: 400, fontSize: 26, color: colors.muted, lineHeight: 1.4, marginTop: 20, maxWidth: 760 }, profile.tagline),
+  const lines = portrait.split('\n');
+  const art = el('div', { position: 'absolute', right: 40, top: 28, flexDirection: 'column' },
+    lines.map((l, i) => el('div', {
+      fontFamily: MONO, fontSize: 12.6, lineHeight: 1, height: 13.4, whiteSpace: 'pre', letterSpacing: 0.4,
+      color: colors.paper, opacity: Math.max(0.25, 1 - Math.max(0, i - 28) * 0.05),
+    }, l || ' ')));
+  const left = el('div', { position: 'absolute', left: PAD, top: PAD, bottom: PAD, width: 520, flexDirection: 'column', justifyContent: 'space-between' }, [
+    el('div', { fontFamily: MONO, fontSize: 22, color: colors.muted, letterSpacing: 0.4 }, 'rijudevx.github.io'),
+    el('div', { flexDirection: 'column' }, [
+      el('div', { fontFamily: MONO, fontSize: 22, color: colors.accent, marginBottom: 18 }, `@${profile.handle}`),
+      el('div', { fontWeight: 600, fontSize: 92, color: colors.paper, letterSpacing: -4.2, lineHeight: 0.98 }, 'Riju Dev'),
+      el('div', { fontWeight: 600, fontSize: 92, color: colors.paper, letterSpacing: -4.2, lineHeight: 0.98 }, 'Purkayastha'),
+    ]),
+    el('div', { fontFamily: MONO, fontSize: 20, color: colors.muted }, 'Kolkata, India'),
   ]);
-  return frame([el('div', { width: INNER_W, alignItems: 'center', justifyContent: 'space-between' }, [copy, monogram])]);
+  return el('div', { position: 'relative', width: W, height: H, background: colors.ink, fontFamily: SANS, overflow: 'hidden' }, [
+    dotGrid(W, H),
+    art,
+    el('div', { position: 'absolute', left: 0, top: 0, width: 700, height: H, backgroundImage: `linear-gradient(90deg, ${colors.ink} 62%, rgba(20,20,19,0))` }),
+    left,
+  ]);
 }
 
-// Work card: title, summary, status pill and up to three stats.
 export function workCard(data: {
   title: string;
   summary: string;
