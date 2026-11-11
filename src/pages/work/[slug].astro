@@ -14,7 +14,7 @@ const { Content } = await render(entry);
 const d = entry.data;
 const s = statusLabel[d.status];
 ---
-<Base title={d.title} description={d.summary}>
+<Base title={d.title} description={d.summary} page="work" work={{ slug: entry.id, ...d }}>
   <article>
     <header class="cs-head">
       <a class="back mono" href="/#work" data-sound="tap"><Icon name="back" /> all work</a>

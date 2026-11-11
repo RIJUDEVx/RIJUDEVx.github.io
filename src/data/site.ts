@@ -15,12 +15,37 @@ export const profile = {
   workModes: 'Kolkata or Bengaluru · on-site, hybrid or remote',
 };
 
-export const links = [
-  { label: 'GitHub', href: 'https://github.com/RIJUDEVx', icon: 'github' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/rijudevpurkayastha', icon: 'linkedin' },
-  { label: 'X', href: 'https://x.com/RIJUDEVx', icon: 'x' },
+export type Link = { label: string; href: string; icon: string; brand?: string };
+export const links: Link[] = [
+  { label: 'GitHub', href: 'https://github.com/RIJUDEVx', icon: 'github', brand: 'github' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/rijudevpurkayastha', icon: 'linkedin', brand: 'linkedin' },
+  { label: 'X', href: 'https://x.com/RIJUDEVx', icon: 'x', brand: 'x' },
   { label: 'Resume', href: '/resume.pdf', icon: 'file' },
-] as const;
+];
+
+export const education = {
+  school: 'Maulana Abul Kalam Azad University of Technology',
+  degree: 'B.Tech, Computer Science',
+  years: '2018 – 2022',
+  cgpa: '8.45',
+};
+
+// Icons are thesvg.org brand logos in src/assets/brands/.
+export const stackIcons = [
+  { label: 'TypeScript', icon: 'typescript' },
+  { label: 'Node.js', icon: 'nodedotjs' },
+  { label: 'Hono', icon: 'hono' },
+  { label: 'PostgreSQL', icon: 'postgresql' },
+  { label: 'Neon', icon: 'neon' },
+  { label: 'Cloudflare Workers', icon: 'cloudflare-workers' },
+  { label: 'Prisma', icon: 'prisma' },
+  { label: 'React', icon: 'react' },
+  { label: 'TanStack', icon: 'tanstack' },
+  { label: 'Docker', icon: 'docker' },
+  { label: 'GitHub Actions', icon: 'github-actions' },
+  { label: 'Swift', icon: 'swift' },
+  { label: 'Salesforce', icon: 'salesforce' },
+];
 
 // "Before you hire me" chips. Only questions with confirmed answers.
 export const questions = [

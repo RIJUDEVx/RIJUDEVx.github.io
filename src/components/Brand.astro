@@ -1,0 +1,19 @@
+---
+// Brand logos from thesvg.org, stored in src/assets/brands/<name>.svg.
+// mono: recolour to currentColor so it follows the text colour (for icon rows).
+interface Props { name: string; size?: number; mono?: boolean; label?: string; class?: string }
+const { name, size = 18, mono = false, label, class: cls } = Astro.props;
+const files = import.meta.glob('../assets/brands/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+let svg = files[`../assets/brands/${name}${mono && files[`../assets/brands/${name}-mono.svg`] ? '-mono' : ''}.svg`] ?? '';
+svg = svg.replace(/<\?xml[^>]*>/, '').replace(/<!--[\s\S]*?-->/g, '');
+if (mono) {
+  svg = svg
+    .replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"')
+    .replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"')
+    .replace(/<svg(?![^>]*fill=)/, '<svg fill="currentColor"');
+}
+svg = svg
+  .replace(/\s(width|height)="[^"]*"/g, '')
+  .replace('<svg', `<svg width="${size}" height="${size}" ${label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"'} class="brand ${cls ?? ''}"`);
+---
+<Fragment set:html={svg} />

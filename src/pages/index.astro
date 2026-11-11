@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
+import Banner from '../components/Banner.svelte';
+import CutLine from '../components/CutLine.svelte';
 import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
@@ -10,149 +12,177 @@ import ExperienceToggle from '../components/ExperienceToggle.svelte';
 import Pipeline from '../components/Pipeline.svelte';
 import GitHubGraph from '../components/GitHubGraph.astro';
 import Icon from '../components/Icon.astro';
-import { profile, links, questions, previews, experience, stack, statusLabel } from '../data/site';
+import Brand from '../components/Brand.astro';
+import { profile, links, questions, previews, experience, stackIcons, statusLabel, education } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const social = links.filter((l) => l.brand);
 ---
-<Base>
+<Base page="home" faq={questions}>
   <Intro slot="intro" client:load name={profile.name} />
 
-  <section class="hero">
+  <section class="profile">
+    <div class="banner"><Banner client:visible /></div>
     <div class="identity">
-      <div class="avatar" aria-hidden="true"><span class="display">rd</span></div>
-      <div>
-        <h1 class="display" transition:name="name">{profile.name}</h1>
-        <p class="tagline">{profile.tagline}</p>
+      <div class="avatar" aria-hidden="true"><span>rd</span></div>
+      <div class="who">
+        <h1 transition:name="name">{profile.name}</h1>
+        <div class="icons">
+          <span class="role">{profile.title} · <a href={profile.company.url} target="_blank" rel="noopener">{profile.company.name}</a></span>
+          {social.map((l) => (
+            <a href={l.href} target="_blank" rel="noopener me" aria-label={l.label} title={l.label} data-sound="tap"><Brand name={l.brand!} mono size={17} /></a>
+          ))}
+        </div>
       </div>
     </div>
 
-    <ul class="facts">
-      <li><Icon name="code" /><span>{profile.title} at <a href={profile.company.url}>{profile.company.name}</a></span></li>
-      <li><Icon name="clock" /><Clock client:load variant="hero" /></li>
-      <li><Icon name="pin" /><span>{profile.city}</span></li>
-      <li><Icon name="mail" /><CopyEmail client:load email={profile.email} /></li>
-    </ul>
+    <p class="meta"><Icon name="pin" />{profile.city}<span class="dot">·</span><Icon name="clock" /><Clock client:load variant="hero" /></p>
 
-    <p class="avail"><span class="badge" data-tone="ok">{profile.availability}</span> <span class="mono muted">{profile.workModes}</span></p>
+    <div class="actions">
+      <CopyEmail client:load email={profile.email} big />
+      <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
+      <span class="badge" data-tone="ok">{profile.availability}</span>
+    </div>
 
-    <nav class="links" aria-label="Elsewhere">
-      {links.map((l) => <a class="pill" href={l.href} data-sound="tap" target={l.href.startsWith('http') ? '_blank' : undefined} rel="noopener"><Icon name={l.icon} />{l.label}</a>)}
-    </nav>
+    <p class="tagline">{profile.tagline}</p>
 
+    <CutLine client:visible label="Cut along the line to read more">
+      <div class="prose" id="about">
+        <p>
+          I'm a backend-focused full-stack engineer with 4+ years at Selegic. I designed and built{' '}
+          <Preview client:visible {...previews.crm} statusText={statusLabel[previews.crm.status].text} tone={statusLabel[previews.crm.status].tone}>Selegic CRM</Preview>{' '}
+          from an empty repo, took it to its first release on my own in five months, and now lead the team that builds it.
+        </p>
+        <p>
+          Along the way I built{' '}
+          <Preview client:visible {...previews.migrata} statusText={statusLabel[previews.migrata.status].text} tone={statusLabel[previews.migrata.status].tone}>Migrata</Preview>, which replaced manual Salesforce CPQ deployments and now lives on AppExchange, and{' '}
+          <Preview client:visible {...previews.internal} statusText={statusLabel[previews.internal.status].text} tone={statusLabel[previews.internal.status].tone}>the platform</Preview>{' '}
+          the whole company tracks its time on. Before that, native iOS apps.
+        </p>
+        <p>I care about systems that stay correct when real people use them: access control, clean data, and releases nobody has to hold their breath for.</p>
+        <p class="mono muted">{profile.workModes}</p>
+      </div>
+    </CutLine>
+  </section>
+
+  <section class="section" id="ask">
     <Questions client:visible questions={questions} />
   </section>
 
-  <section class="section" id="about">
-    <div class="section-head"><h2>about</h2><span class="mono">01</span></div>
-    <div class="prose">
-      <p>
-        I'm a backend-focused full-stack engineer with 4+ years at Selegic. I designed and built{' '}
-        <Preview client:visible {...previews.crm} statusText={statusLabel[previews.crm.status].text} tone={statusLabel[previews.crm.status].tone}>Selegic CRM</Preview>{' '}
-        from an empty repo, took it to its first release on my own in five months, and now lead the team that builds it.
-      </p>
-      <p>
-        Along the way I built{' '}
-        <Preview client:visible {...previews.migrata} statusText={statusLabel[previews.migrata.status].text} tone={statusLabel[previews.migrata.status].tone}>Migrata</Preview>, which replaced manual Salesforce CPQ deployments and now lives on AppExchange, and{' '}
-        <Preview client:visible {...previews.internal} statusText={statusLabel[previews.internal.status].text} tone={statusLabel[previews.internal.status].tone}>the platform</Preview>{' '}
-        the whole company tracks its time on. Before that, native iOS apps.
-      </p>
-      <p>I care about systems that stay correct when real people use them: access control, clean data, and releases nobody has to hold their breath for.</p>
-      <p class="mono muted hint">hover or tap an underline to preview the work</p>
-    </div>
+  <section class="section" id="experience">
+    <div class="section-head"><h2>Experience</h2></div>
+    <ExperienceToggle client:visible {...experience} />
   </section>
 
   <section class="section" id="work">
-    <div class="section-head"><h2>selected work</h2><span class="mono">02</span></div>
+    <div class="section-head"><h2>Projects</h2><a class="mono muted" href="/work/selegic-crm">case studies →</a></div>
     <ol class="work">
-      {work.map((w, i) => (
+      {work.map((w) => (
         <li>
-          <a href={`/work/${w.id}`} class="card" data-sound="tap">
+          <a href={`/work/${w.id}`} class="card" data-sound="tap" data-cursor="open">
             <div class="card-top">
-              <span class="mono muted">{String(i + 1).padStart(2, '0')}</span>
+              <h3 transition:name={`title-${w.id}`}>{w.data.title}</h3>
               <span class="badge" data-tone={statusLabel[w.data.status].tone}>{statusLabel[w.data.status].text}</span>
             </div>
-            <h3 class="display" transition:name={`title-${w.id}`}>{w.data.title}</h3>
             <p>{w.data.summary}</p>
             {w.data.stats.length > 0 && (
               <dl class="stats">{w.data.stats.slice(0, 2).map((s) => <div><dt>{s.value}</dt><dd class="mono muted">{s.label}</dd></div>)}</dl>
             )}
-            <span class="mono muted more">{w.data.role} · {w.data.years} <span aria-hidden="true">→</span></span>
+            <ul class="tags">{w.data.stack.slice(0, 4).map((t) => <li class="mono">{t}</li>)}</ul>
           </a>
         </li>
       ))}
     </ol>
   </section>
 
-  <section class="section" id="experience">
-    <div class="section-head"><h2>experience</h2><span class="mono">03</span></div>
-    <ExperienceToggle client:visible {...experience} />
-  </section>
-
   <section class="section" id="pipeline">
-    <div class="section-head"><h2>try the thing i build</h2><span class="mono">04</span></div>
+    <div class="section-head"><h2>Try the thing I build</h2></div>
     <p class="muted lead">A tiny CRM pipeline. Drag a deal to the next stage and close it.</p>
     <Pipeline client:visible />
   </section>
 
   <section class="section" id="activity">
-    <div class="section-head"><h2>activity</h2><span class="mono">05</span></div>
     <GitHubGraph user="RIJUDEVx" />
-    <ul class="stack">{stack.map((s) => <li class="mono">{s}</li>)}</ul>
+  </section>
+
+  <section class="section" id="education">
+    <div class="section-head"><h2>Education</h2></div>
+    <div class="edu">
+      <div class="edu-head"><h3>{education.school}</h3><span class="mono muted">{education.years}</span></div>
+      <p class="mono muted">{education.degree} · CGPA {education.cgpa}</p>
+    </div>
+  </section>
+
+  <section class="section" id="skills">
+    <div class="section-head"><h2>Skills</h2></div>
+    <ul class="skills">
+      {stackIcons.map((s) => <li><Brand name={s.icon} size={16} />{s.label}</li>)}
+    </ul>
   </section>
 
   <section class="section" id="contact">
-    <div class="section-head"><h2>say hi</h2><span class="mono">06</span></div>
-    <p class="lead-big display">Hiring a team lead, or need someone to own a backend end to end? I'd like to hear about it.</p>
-    <div class="contact-row">
+    <div class="section-head"><h2>Say hi</h2></div>
+    <p class="lead-big">Hiring a team lead, or need someone to own a backend end to end? I'd like to hear about it.</p>
+    <div class="actions">
       <CopyEmail client:visible email={profile.email} big />
-      <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
-      <a class="pill" href={links[1].href} target="_blank" rel="noopener" data-sound="tap"><Icon name="linkedin" />LinkedIn</a>
+      <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={15} />LinkedIn</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .hero { padding: 48px var(--gutter) 40px; }
-  .identity { display: flex; gap: 20px; align-items: center; }
-  .avatar {
-    flex: none; width: 96px; height: 96px; border-radius: 22px;
-    border: 1px solid var(--rule-strong); background: var(--surface); box-shadow: var(--shadow);
-    display: grid; place-items: center; color: var(--ink); font-size: 2.5rem;
-    transform: rotate(-3deg);
-  }
-  h1 { font-size: clamp(2.5rem, 7vw, 3.5rem); }
-  .tagline { margin: 6px 0 0; color: var(--muted); font-family: var(--font-mono); font-size: 0.875rem; }
-  .facts { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: 1.25fr 1fr; gap: 10px 24px; font-family: var(--font-mono); font-size: 0.8125rem; color: var(--text); }
-  .facts li { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .facts :global(svg) { width: 15px; height: 15px; color: var(--muted); flex: none; }
-  .avail { margin: 22px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .profile { padding: 0 var(--gutter) 8px; }
+  .banner { height: 144px; margin: 0 calc(-1 * var(--gutter)); position: relative; overflow: hidden; }
+  .banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, var(--paper)); pointer-events: none; }
 
-  .prose p { margin: 0 0 16px; font-size: 1.0625rem; }
-  .hint { font-size: 0.75rem; }
+  .identity { display: flex; gap: 20px; align-items: flex-end; margin-top: -40px; position: relative; }
+  .avatar {
+    flex: none; width: 104px; height: 104px; border-radius: 16px;
+    background: var(--ink); color: var(--paper); display: grid; place-items: center;
+    font-size: 2.75rem; font-weight: 600; letter-spacing: -0.06em;
+    box-shadow: 0 0 0 4px var(--paper);
+  }
+  h1 { font-size: 2.25rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; }
+  .icons { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 6px; color: var(--text); }
+  .icons a { color: var(--text); display: inline-flex; transition: color 0.2s, transform 0.2s var(--ease); }
+  .icons a:hover { color: var(--ink); transform: translateY(-1px); }
+  .role { font-size: 0.9375rem; }
+  .role a { text-decoration: none; color: var(--ink); }
+
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 18px 0 0; font-size: 0.875rem; color: var(--muted); }
+  .meta :global(svg) { width: 14px; height: 14px; }
+  .dot { margin: 0 4px; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+  .tagline { margin: 28px 0 12px; font-size: 1rem; color: var(--ink); }
+
+  .prose { padding-top: 8px; }
+  .prose p { margin: 0 0 14px; font-size: 0.9375rem; line-height: 1.7; }
 
   .work { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .card { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 20px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); text-decoration: none; transition: border-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s; }
-  .card:hover { border-color: var(--rule-strong); transform: translateY(-3px); box-shadow: var(--shadow); }
-  .card-top { display: flex; justify-content: space-between; align-items: center; }
-  .card h3 { font-size: 1.75rem; }
-  .card p { margin: 0; font-size: 0.9375rem; }
-  .stats { display: flex; gap: 20px; margin: 4px 0 0; }
-  .stats dt { font-family: var(--font-display); font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
+  .card { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 18px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); text-decoration: none; transition: border-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s; }
+  .card:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .card h3 { font-size: 1.0625rem; font-weight: 600; }
+  .card p { margin: 0; font-size: 0.8125rem; line-height: 1.55; color: var(--muted); }
+  .stats { display: flex; gap: 20px; margin: 2px 0 0; }
+  .stats dt { font-size: 1.125rem; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; }
   .stats dd { margin: 0; font-size: 0.6875rem; }
-  .more { margin-top: auto; font-size: 0.75rem; }
+  .tags { list-style: none; padding: 0; margin: auto 0 0; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tags li { font-size: 0.6875rem; padding: 1px 7px; border-radius: 6px; background: var(--rule); color: var(--text); }
 
-  .lead { margin: -8px 0 20px; }
-  .stack { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
-  .stack li { padding: 3px 9px; border: 1px solid var(--rule); border-radius: 6px; color: var(--muted); }
-
-  .lead-big { font-size: clamp(1.6rem, 4vw, 2.2rem); color: var(--ink); margin: 0 0 24px; }
-  .contact-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .lead { margin: -12px 0 20px; font-size: 0.875rem; }
+  .edu-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .edu h3 { font-size: 1.0625rem; font-weight: 600; }
+  .edu p { margin: 4px 0 0; }
+  .skills { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .skills li { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); font-size: 0.8125rem; color: var(--ink); }
+  .lead-big { font-size: 1.25rem; color: var(--ink); margin: 0 0 20px; letter-spacing: -0.015em; }
 
   @media (max-width: 640px) {
-    .identity { flex-direction: column; align-items: flex-start; }
-    .avatar { width: 80px; height: 80px; }
-    .facts { grid-template-columns: 1fr; }
+    .banner { height: 120px; }
+    .identity { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .avatar { width: 88px; height: 88px; font-size: 2.25rem; }
+    h1 { font-size: 1.875rem; }
     .work { grid-template-columns: 1fr; }
   }
 </style>
