@@ -7,6 +7,6 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://rijudevx.github.io',
-  integrations: [svelte(), sitemap({ filter: (page) => !page.includes('/v/') && !page.includes('/writing/') })],
+  integrations: [svelte(), sitemap({ filter: (page) => !page.includes('/v/') && !/\/v1\/?$/.test(page) && !page.includes('/writing/') })],
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 });

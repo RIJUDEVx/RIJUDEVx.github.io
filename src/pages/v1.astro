@@ -1,24 +1,26 @@
 ---
 import { getCollection } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import Intro from '../../components/Intro.svelte';
-import Banner from '../../components/Banner.svelte';
-import CutLine from '../../components/CutLine.svelte';
-import Clock from '../../components/Clock.svelte';
-import CopyEmail from '../../components/CopyEmail.svelte';
-import Questions from '../../components/Questions.svelte';
-import Preview from '../../components/Preview.svelte';
-import ExperienceToggle from '../../components/ExperienceToggle.svelte';
-import Pipeline from '../../components/Pipeline.svelte';
-import GitHubGraph from '../../components/GitHubGraph.astro';
-import Icon from '../../components/Icon.astro';
-import Brand from '../../components/Brand.astro';
-import { profile, links, questions, previews, experience, stackIcons, statusLabel, education } from '../../data/site';
+import VersionSwitch from '../components/VersionSwitch.astro';
+import Base from '../layouts/Base.astro';
+import Intro from '../components/Intro.svelte';
+import Banner from '../components/Banner.svelte';
+import CutLine from '../components/CutLine.svelte';
+import Clock from '../components/Clock.svelte';
+import CopyEmail from '../components/CopyEmail.svelte';
+import Questions from '../components/Questions.svelte';
+import Preview from '../components/Preview.svelte';
+import ExperienceToggle from '../components/ExperienceToggle.svelte';
+import Pipeline from '../components/Pipeline.svelte';
+import GitHubGraph from '../components/GitHubGraph.astro';
+import Icon from '../components/Icon.astro';
+import Brand from '../components/Brand.astro';
+import { profile, links, questions, previews, experience, stackIcons, statusLabel, education } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 const social = links.filter((l) => l.brand);
 ---
-<Base title="Current" noindex>
+<Base title="v1" noindex>
+  <VersionSwitch />
   <Intro slot="intro" client:load name={profile.name} />
 
   <section class="profile" id="top">

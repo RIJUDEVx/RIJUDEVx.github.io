@@ -1,0 +1,35 @@
+---
+// Review-only: jump between home page versions. Remove once one is chosen.
+const versions = [
+  { label: 'Home', href: '/' },
+  { label: 'v1', href: '/v1' },
+  { label: 'Bento', href: '/v/bento' },
+  { label: 'Editorial', href: '/v/editorial' },
+];
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+<nav class="vs" aria-label="Page versions">
+  <span class="mono k">ver</span>
+  {versions.map((v) => (
+    <a href={v.href} class:list={{ on: here === v.href }} aria-current={here === v.href ? 'page' : undefined} data-sound="tap">{v.label}</a>
+  ))}
+</nav>
+
+<style>
+  .vs {
+    position: fixed; z-index: 70; top: 14px; right: 16px;
+    display: flex; align-items: center; gap: 2px; padding: 4px;
+    border-radius: 999px; border: 1px solid var(--rule-strong);
+    background: color-mix(in oklab, var(--surface) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: var(--shadow);
+  }
+  .k { padding: 0 6px 0 8px; font-size: 0.625rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  a { padding: 5px 10px; border-radius: 999px; font-size: 0.75rem; color: var(--muted); text-decoration: none; transition: color 0.15s, background 0.15s; }
+  a:hover { color: var(--ink); }
+  a.on { background: var(--ink); color: var(--paper); }
+  @media (max-width: 760px) {
+    .vs { top: auto; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom)); }
+    .k { display: none; }
+  }
+</style>

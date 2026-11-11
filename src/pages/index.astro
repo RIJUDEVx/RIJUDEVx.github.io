@@ -6,6 +6,7 @@
 //  - Editorial (A): restraint, mono section labels, no ornament for its own sake.
 // Phones get iOS grouped lists and cards (see the 760px block at the bottom).
 import { getCollection } from 'astro:content';
+import VersionSwitch from '../components/VersionSwitch.astro';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
 import Ascii from '../components/Ascii.astro';
@@ -42,6 +43,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../asset
 const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
 ---
 <Base page="home" faq={questions}>
+  <VersionSwitch />
   <Intro slot="intro" client:load name={profile.name} />
 
   <section class="hero" id="top">

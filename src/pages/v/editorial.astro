@@ -2,6 +2,7 @@
 // Variant A · Editorial. Two columns: a sticky identity column on the left,
 // the work on the right. Restraint over tricks; proof (numbers, ownership) up front.
 import { getCollection } from 'astro:content';
+import VersionSwitch from '../../components/VersionSwitch.astro';
 import Base from '../../layouts/Base.astro';
 import Clock from '../../components/Clock.svelte';
 import CopyEmail from '../../components/CopyEmail.svelte';
@@ -19,6 +20,7 @@ const sections = [
 ];
 ---
 <Base title="Editorial" noindex>
+  <VersionSwitch />
   <div class="ed">
     <aside class="side">
       <div class="side-in">

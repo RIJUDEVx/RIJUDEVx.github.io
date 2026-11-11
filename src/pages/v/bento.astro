@@ -2,6 +2,7 @@
 // Variant B · Bento. A product-page grid (Linear / Vercel era): every tile is
 // one fact you can check. The CRM gets the biggest tile because it's the story.
 import { getCollection } from 'astro:content';
+import VersionSwitch from '../../components/VersionSwitch.astro';
 import Base from '../../layouts/Base.astro';
 import Clock from '../../components/Clock.svelte';
 import CopyEmail from '../../components/CopyEmail.svelte';
@@ -15,6 +16,7 @@ const [crm, migrata, internal, docgen] = work;
 const social = links.filter((l) => l.brand);
 ---
 <Base title="Bento" noindex>
+  <VersionSwitch />
   <section class="hero">
     <div class="who">
       <span class="tile-rd rd" aria-hidden="true">rd</span>
