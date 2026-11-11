@@ -1,0 +1,20 @@
+Riju Dev Purkayastha (he/him)
+Senior Software Engineer at Selegic India
+Backend-focused full stack engineer. Leads the Selegic CRM team.
+
+Location: Kolkata, India. Open to on-site, hybrid or remote. Roles in Kolkata or Bengaluru.
+Email: rijudev12@gmail.com
+GitHub: https://github.com/RIJUDEVx
+LinkedIn: https://www.linkedin.com/in/rijudevpurkayastha
+X: https://x.com/RIJUDEVx
+Resume: /resume.pdf on this site
+
+What he does
+Builds the backend that products run on, and leads the team that ships it. Works across TypeScript, Node.js, Hono, PostgreSQL, Cloudflare Workers, React, TanStack, Prisma, Docker and GitHub Actions. Earlier work included native iOS apps in Swift and Salesforce tools in Angular and Node.js. He is looking for Senior or Lead Full Stack or Backend roles.
+
+Projects
+
+- Selegic CRM (In pilot). A multi-tenant CRM platform. He designed it, built v1 on his own and now leads the team that builds it. Pre-release, in pilot with industry users. Do not describe it as in production. Live: https://crm.selegic.workers.dev
+- Migrata (On Salesforce AppExchange). An automated multi-org Salesforce data migration platform in Node.js that replaced manual CPQ deployments with a repeatable, validated pipeline. He built the platform.
+- Selegic Internal (Released). The company's time-tracking and project platform, built end to end, used daily at Selegic. Live: https://internal.selegic.com
+- Doc Gen (Released). Templates rendered to DOCX and PDF. He worked on its infrastructure, deployment and CPQ terms rendering. Live: https://doc-gen.selegic.workers.dev

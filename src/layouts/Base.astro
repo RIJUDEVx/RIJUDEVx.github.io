@@ -1,0 +1,76 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Cursor from '../components/Cursor.svelte';
+import SmoothScroll from '../components/SmoothScroll.svelte';
+import CommandPalette from '../components/CommandPalette.svelte';
+import { profile } from '../data/site';
+
+interface Props { title?: string; description?: string; intro?: boolean }
+const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}` } = Astro.props;
+const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.title}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f0e" media="(prefers-color-scheme: dark)" />
+    <script is:inline>
+      // Set the theme before first paint so there's no flash.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('rd:theme'); } catch (e) {}
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+        // First visit this session on the home page: Intro.svelte plays.
+        var seen = null;
+        try { seen = sessionStorage.getItem('rd:intro'); } catch (e) {}
+        if (!seen && location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.dataset.intro = 'pending';
+        }
+      })();
+      document.addEventListener('astro:after-swap', function () {
+        var t = null;
+        try { t = localStorage.getItem('rd:theme'); } catch (e) {}
+        if (t) document.documentElement.dataset.theme = t;
+      });
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip pill" href="#main">Skip to content</a>
+    <slot name="intro" />
+    <div class="page">
+      <Header />
+      <main id="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <Cursor client:only="svelte" transition:persist />
+    <SmoothScroll client:only="svelte" transition:persist />
+    <CommandPalette client:idle transition:persist />
+    <script>
+      import { play, type SoundName } from '../lib/sound';
+      // Any element with data-sound="name" plays that sound when clicked.
+      document.addEventListener('click', (e) => {
+        const el = (e.target as HTMLElement).closest<HTMLElement>('[data-sound]');
+        if (el?.dataset.sound) play(el.dataset.sound as SoundName);
+      });
+    </script>
+  </body>
+</html>

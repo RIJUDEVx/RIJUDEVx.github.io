@@ -1,0 +1,48 @@
+---
+import Controls from './Controls.svelte';
+import { profile } from '../data/site';
+const nav = [
+  { label: 'work', href: '/#work' },
+  { label: 'experience', href: '/#experience' },
+  { label: 'about', href: '/#about' },
+  { label: 'contact', href: '/#contact' },
+];
+---
+<header class="site-header" transition:persist>
+  <a class="mark display" href="/" aria-label={`${profile.name}, home`} data-sound="tap" transition:name="mark">{profile.monogram}</a>
+  <nav aria-label="Site">
+    {nav.map((n) => <a href={n.href} data-sound="tap">{n.label}</a>)}
+  </nav>
+  <Controls client:load />
+</header>
+<nav class="dock" aria-label="Site (mobile)" transition:persist="dock">
+  {nav.map((n) => <a href={n.href} data-sound="tap">{n.label}</a>)}
+</nav>
+
+<style>
+  .site-header {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 16px;
+    height: 60px; padding: 0 var(--gutter);
+    background: color-mix(in oklab, var(--paper) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px dashed var(--rule);
+  }
+  .mark { font-size: 1.75rem; text-decoration: none; color: var(--ink); line-height: 1; }
+  nav { margin-left: auto; display: flex; gap: 2px; }
+  nav a { padding: 6px 10px; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: 0.9375rem; transition: color 0.2s, background 0.2s; }
+  nav a:hover { color: var(--ink); background: var(--accent-soft); }
+  .dock { display: none; }
+  @media (max-width: 640px) {
+    .site-header nav { display: none; }
+    .site-header :global(.controls) { margin-left: auto; }
+    .dock {
+      display: flex; gap: 2px; position: fixed; z-index: 45; left: 50%; bottom: max(14px, env(safe-area-inset-bottom));
+      transform: translateX(-50%); padding: 5px; border-radius: 999px;
+      background: color-mix(in oklab, var(--surface) 88%, transparent); backdrop-filter: blur(12px);
+      border: 1px solid var(--rule-strong); box-shadow: var(--shadow);
+    }
+    .dock a { padding: 7px 12px; border-radius: 999px; text-decoration: none; font-size: 0.875rem; color: var(--muted); }
+    .dock a:active { background: var(--accent-soft); color: var(--ink); }
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+import Clock from './Clock.svelte';
+import { profile, links } from '../data/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <p class="mono">© {year} {profile.name} · <Clock client:idle variant="footer" /></p>
+  <ul>
+    {links.map((l) => <li><a class="mono" href={l.href} data-sound="tap">{l.label.toLowerCase()}</a></li>)}
+    <li><a class="mono" href="/llms.txt">llms.txt</a></li>
+  </ul>
+  <p class="mono hint">press <kbd>⌘</kbd> <kbd>K</kbd> to jump anywhere</p>
+</footer>
+
+<style>
+  .site-footer { padding: 32px var(--gutter) 48px; border-top: 1px dashed var(--rule); display: grid; gap: 12px; color: var(--muted); }
+  p { margin: 0; }
+  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  a { color: var(--muted); text-decoration: none; }
+  a:hover { color: var(--ink); }
+  kbd { font-family: var(--font-mono); font-size: 0.6875rem; border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+  @media (hover: none) { .hint { display: none; } }
+</style>

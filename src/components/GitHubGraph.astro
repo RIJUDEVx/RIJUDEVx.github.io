@@ -1,0 +1,129 @@
+---
+interface Props {
+  user: string;
+}
+
+interface Day {
+  date: string;
+  count: number;
+  level: number;
+}
+
+interface Graph {
+  total: { lastYear: number };
+  contributions: Day[];
+}
+
+const { user } = Astro.props;
+const profileUrl = `https://github.com/${user}`;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const CELL = 10;
+const GAP = 3;
+const STEP = CELL + GAP;
+const WEEKS = 53;
+const LABEL_H = 16;
+const WIDTH = WEEKS * STEP - GAP;
+const HEIGHT = LABEL_H + 7 * STEP - GAP;
+
+// Fetched at build time. If the API is slow or down, render a plain link card instead.
+let graph: Graph | null = null;
+const controller = new AbortController();
+const timer = setTimeout(() => controller.abort(), 6000);
+try {
+  const res = await fetch(
+    `https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(user)}?y=last`,
+    { signal: controller.signal },
+  );
+  if (res.ok) {
+    const json = (await res.json()) as Graph;
+    if (Array.isArray(json.contributions) && json.contributions.length > 0 && typeof json.total?.lastYear === 'number') {
+      graph = json;
+    }
+  }
+} catch (err) {
+  console.warn(`GitHub graph unavailable for ${user}:`, err);
+  graph = null;
+} finally {
+  clearTimeout(timer);
+}
+
+// Dates are YYYY-MM-DD; parse as UTC so the timezone of the build machine doesn't shift them.
+const parse = (d: string) => new Date(`${d}T00:00:00Z`);
+const days = graph?.contributions ?? [];
+// Column 0 starts on the Sunday of the first day, so the first day's weekday is its row offset.
+const offset = days.length ? parse(days[0].date).getUTCDay() : 0;
+
+const cells = days.map((d, i) => {
+  const slot = i + offset;
+  const date = parse(d.date);
+  return {
+    x: Math.floor(slot / 7) * STEP,
+    y: LABEL_H + (slot % 7) * STEP,
+    level: Math.min(4, Math.max(0, d.level)),
+    title: `${d.count} contribution${d.count === 1 ? '' : 's'} on ${MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}`,
+  };
+});
+
+// One label per month, at the first column that contains a day 1–7 of that month.
+const months: { x: number; text: string }[] = [];
+const seen = new Set<string>();
+days.forEach((d, i) => {
+  const date = parse(d.date);
+  const key = d.date.slice(0, 7);
+  if (date.getUTCDate() <= 7 && !seen.has(key)) {
+    seen.add(key);
+    months.push({ x: Math.floor((i + offset) / 7) * STEP, text: MONTHS[date.getUTCMonth()] });
+  }
+});
+
+const total = graph ? graph.total.lastYear.toLocaleString('en-US') : '';
+---
+<div class="gh">
+  {graph ? (
+    <>
+      <div class="head mono">
+        <span>github · @{user}</span>
+        <a href={profileUrl} target="_blank" rel="noopener" data-sound="tap">view profile ↗</a>
+      </div>
+      <svg class="grid" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width="100%" role="img" aria-label={`${total} GitHub contributions in the last year`}>
+        {months.map((m) => <text class="month" x={m.x} y={10}>{m.text}</text>)}
+        {cells.map((c) => (
+          <rect class={`l${c.level}`} x={c.x} y={c.y} width={CELL} height={CELL} rx="2">
+            <title>{c.title}</title>
+          </rect>
+        ))}
+      </svg>
+      <p class="total"><strong>{total}</strong> contributions in the last year</p>
+      <p class="note mono muted">most of my work lives in private company repos</p>
+    </>
+  ) : (
+    <a class="fallback" href={profileUrl} target="_blank" rel="noopener" data-sound="tap">
+      <span class="mono">github · @{user}</span>
+      <span class="mono">view profile ↗</span>
+    </a>
+  )}
+</div>
+
+<style>
+  .gh { display: grid; gap: 14px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); }
+  .head a { color: var(--ink); }
+  .grid { display: block; width: 100%; height: auto; }
+  .month { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+  .l0 { fill: var(--rule); }
+  .l1 { fill: color-mix(in oklab, var(--accent) 25%, transparent); }
+  .l2 { fill: color-mix(in oklab, var(--accent) 45%, transparent); }
+  .l3 { fill: color-mix(in oklab, var(--accent) 70%, transparent); }
+  .l4 { fill: color-mix(in oklab, var(--accent) 100%, transparent); }
+  .total { margin: 0; color: var(--text); }
+  .total strong { color: var(--ink); font-weight: 600; }
+  .note { margin: 0; font-size: 0.75rem; }
+  .fallback {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 16px 20px; border: 1px solid var(--rule); border-radius: var(--radius);
+    background: var(--surface); color: var(--ink); text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .fallback:hover { border-color: var(--rule-strong); }
+</style>

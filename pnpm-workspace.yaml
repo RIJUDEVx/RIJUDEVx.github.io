@@ -1,0 +1,8 @@
+minimumReleaseAgeExclude:
+  - '@astrojs/internal-helpers@0.13.2'
+  - '@astrojs/markdown-satteri@0.4.9'
+  - '@astrojs/runtime@0.1.1'
+  - '@astrojs/vite-plugin-astro@0.1.2'
+  - astro@7.4.11
+  - '@astrojs/svelte-renderer@0.1.1'
+  - '@astrojs/svelte@9.1.5'
