@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .tile { fill: #141413; }
+    .mark { fill: #87867f; font-family: Inter, system-ui, sans-serif; font-weight: 600; letter-spacing: -0.06em; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #faf9f5; }
+    }
+  </style>
+  <rect class="tile" width="64" height="64" rx="14"/>
+  <text class="mark" x="32" y="33" font-size="30" text-anchor="middle" dominant-baseline="central">zz</text>
+</svg>

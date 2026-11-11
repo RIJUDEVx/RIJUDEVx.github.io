@@ -59,14 +59,14 @@
   .wrap { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: 100%; }
   .copy {
     background: none; border: 0; padding: 0; cursor: pointer; min-width: 0;
-    font-family: var(--font-mono); font-size: 0.8125rem; letter-spacing: 0; color: inherit;
+    font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0; color: inherit;
     text-align: left; overflow-wrap: anywhere;
     text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px;
   }
   .copy:hover { text-decoration-color: currentColor; }
   .copy.pill {
-    background: var(--surface); border: 1px solid var(--rule-strong); padding: 12px 20px;
-    font-size: 1.0625rem; color: var(--ink); text-decoration: none;
+    background: var(--surface); border: 1px solid var(--rule-strong); padding: 6px 14px;
+    font-family: var(--font-sans); font-weight: 500; font-size: 0.875rem; color: var(--ink); text-decoration: none;
   }
   .copy.pill:hover { border-color: var(--ink); }
   .copied { color: var(--ok); font-size: 0.75rem; min-height: 1em; }

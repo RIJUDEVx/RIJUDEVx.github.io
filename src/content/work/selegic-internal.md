@@ -16,7 +16,7 @@ stats:
 
 ## Why it exists
 
-Selegic needed one place for time tracking and project management. It is used every day at Selegic.
+Selegic needed one place for time tracking and project management.
 
 ## What I built
 

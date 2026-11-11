@@ -279,7 +279,7 @@
   .pipe { position: relative; }
 
   .bar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
-  .stat { margin: 0; font-size: 0.8125rem; color: var(--text); }
+  .stat { margin: 0; font-size: 0.75rem; color: var(--text); }
   .num { color: var(--ink); font-variant-numeric: tabular-nums; }
   .reset {
     flex: none; background: none; border: 0; padding: 2px 4px; cursor: pointer;
@@ -325,17 +325,17 @@
   }
 
   .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .name { font-size: 0.875rem; line-height: 1.3; color: var(--ink); font-weight: 500; overflow-wrap: anywhere; }
+  .name { font-size: 0.8125rem; line-height: 1.3; color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
   .owner {
     flex: none; width: 24px; height: 24px; border-radius: 50%;
     display: grid; place-items: center;
     background: var(--accent-soft); color: var(--accent);
-    font-size: 0.5625rem; letter-spacing: 0;
+    font-size: 0.6875rem; letter-spacing: 0;
   }
 
   .mid { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .val { color: var(--ink); font-size: 0.8125rem; }
-  .badge { font-size: 0.5625rem; padding: 1px 6px; }
+  .val { color: var(--ink); font-size: 0.75rem; }
+  .badge { font-size: 0.6875rem; padding: 0 6px; }
   .badge::before { display: none; }
 
   .foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; margin-top: auto; }
@@ -365,7 +365,7 @@
     margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
     padding: 14px 16px; border: 1px dashed var(--rule-strong); border-radius: var(--radius);
   }
-  .cleared p { margin: 0; color: var(--ink); font-family: var(--font-display); font-size: 1.25rem; line-height: 1.3; }
+  .cleared p { margin: 0; color: var(--ink); font-family: var(--font-sans); font-weight: 500; font-size: 1.0625rem; line-height: 1.4; }
 
   .caption { margin: 14px 0 0; font-size: 0.75rem; text-align: center; }
 

@@ -9,7 +9,7 @@ const nav = [
 ];
 ---
 <header class="site-header" transition:persist>
-  <a class="mark display" href="/" aria-label={`${profile.name}, home`} data-sound="tap" transition:name="mark">{profile.monogram}</a>
+  <a class="mark" href="/" aria-label={`${profile.name}, home`} data-sound="tap" transition:name="mark">{profile.monogram}</a>
   <nav aria-label="Site">
     {nav.map((n) => <a href={n.href} data-sound="tap">{n.label}</a>)}
   </nav>
@@ -19,6 +19,17 @@ const nav = [
   {nav.map((n) => <a href={n.href} data-sound="tap">{n.label}</a>)}
 </nav>
 
+<script>
+  // Hairline under the header only once the page has scrolled.
+  // The header persists across ClientRouter navigations, so re-check on each page load.
+  function sync() {
+    document.querySelector<HTMLElement>('.site-header')?.classList.toggle('scrolled', window.scrollY > 8);
+  }
+  window.addEventListener('scroll', sync, { passive: true });
+  document.addEventListener('astro:page-load', sync);
+  sync();
+</script>
+
 <style>
   .site-header {
     position: sticky; top: 0; z-index: 40;
@@ -26,9 +37,11 @@ const nav = [
     height: 60px; padding: 0 var(--gutter);
     background: color-mix(in oklab, var(--paper) 82%, transparent);
     backdrop-filter: blur(10px);
-    border-bottom: 1px dashed var(--rule);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s var(--ease);
   }
-  .mark { font-size: 1.75rem; text-decoration: none; color: var(--ink); line-height: 1; }
+  .site-header.scrolled { border-bottom-color: var(--rule); }
+  .mark { font-family: var(--font-sans); font-size: 20px; font-weight: 600; letter-spacing: -0.04em; text-decoration: none; color: var(--ink); line-height: 1; }
   nav { margin-left: auto; display: flex; gap: 2px; }
   nav a { padding: 6px 10px; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: 0.9375rem; transition: color 0.2s, background 0.2s; }
   nav a:hover { color: var(--ink); background: var(--accent-soft); }

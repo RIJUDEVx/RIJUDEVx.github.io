@@ -169,8 +169,8 @@
 
   .stage { padding: 0 var(--gutter); text-align: center; }
   .name {
-    margin: 0; font-family: var(--font-display); font-weight: 400;
-    font-size: clamp(3rem, 13vw, 9rem); line-height: 1; letter-spacing: -0.02em;
+    margin: 0; font-family: var(--font-sans); font-weight: 500;
+    font-size: clamp(2.75rem, 10vw, 7.5rem); line-height: 1; letter-spacing: -0.045em;
     color: var(--ink); max-width: 92vw;
   }
   .word { display: inline-block; white-space: nowrap; margin-right: 0.22em; }

@@ -77,7 +77,7 @@
 <style>
   .clock { font-variant-numeric: tabular-nums; }
   .time { color: inherit; }
-  .status { margin-left: 10px; color: var(--muted); font-family: var(--font-mono); font-size: 0.8125rem; white-space: nowrap; }
+  .status { margin-left: 10px; color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem; white-space: nowrap; }
   .dot {
     display: inline-block; width: 6px; height: 6px; margin-right: 6px;
     border-radius: 50%; vertical-align: middle; background: var(--muted);

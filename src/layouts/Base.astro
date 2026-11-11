@@ -6,29 +6,28 @@ import Footer from '../components/Footer.astro';
 import Cursor from '../components/Cursor.svelte';
 import SmoothScroll from '../components/SmoothScroll.svelte';
 import CommandPalette from '../components/CommandPalette.svelte';
+import Seo from '../components/Seo.astro';
 import { profile } from '../data/site';
+import type { FaqItem, VideoMeta, WorkMeta } from '../lib/types';
 
-interface Props { title?: string; description?: string; intro?: boolean }
-const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}` } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+  intro?: boolean;
+  page?: 'home' | 'work';
+  faq?: FaqItem[];
+  work?: WorkMeta;
+  video?: VideoMeta;
+}
+const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}`, page = 'home', faq, work, video } = Astro.props;
 const fullTitle = title ? `${title} · ${profile.name}` : `${profile.name} · ${profile.title}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{fullTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content={fullTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
-    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f0f0e" media="(prefers-color-scheme: dark)" />
+    <Seo title={fullTitle} description={description} page={page} faq={faq} work={work} video={video} />
     <script is:inline>
       // Set the theme before first paint so there's no flash.
       (function () {
@@ -48,6 +47,38 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
         if (t) document.documentElement.dataset.theme = t;
       });
+    </script>
+    <script is:inline>
+      // Tab title and favicon change while the tab is hidden. Listeners sit on
+      // document, so they survive ClientRouter swaps; the title and icon are
+      // re-read on astro:page-load so the restored values match the current page.
+      (function () {
+        if (window.__rdAway) return;
+        window.__rdAway = true;
+        var AWAY_TITLE = "brb? the build's still running.";
+        var AWAY_ICON = '/favicon-away.svg';
+        var home = { title: document.title, icon: '/favicon.svg' };
+        function iconEl() { return document.querySelector('link[rel="icon"][type="image/svg+xml"]'); }
+        function remember() {
+          if (document.title !== AWAY_TITLE) home.title = document.title;
+          var el = iconEl();
+          if (el && el.getAttribute('href') !== AWAY_ICON) home.icon = el.getAttribute('href');
+        }
+        function apply() {
+          var el = iconEl();
+          if (document.hidden) {
+            document.title = AWAY_TITLE;
+            if (el) el.setAttribute('href', AWAY_ICON);
+          } else {
+            document.title = home.title;
+            if (el) el.setAttribute('href', home.icon);
+          }
+        }
+        document.addEventListener('visibilitychange', function () { remember(); apply(); });
+        document.addEventListener('astro:page-load', function () { remember(); apply(); });
+        remember();
+        apply();
+      })();
     </script>
     <ClientRouter />
   </head>

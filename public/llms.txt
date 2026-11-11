@@ -1,20 +1,28 @@
-Riju Dev Purkayastha (he/him)
-Senior Software Engineer at Selegic India
-Backend-focused full stack engineer. Leads the Selegic CRM team.
+# Riju Dev Purkayastha
 
-Location: Kolkata, India. Open to on-site, hybrid or remote. Roles in Kolkata or Bengaluru.
-Email: rijudev12@gmail.com
-GitHub: https://github.com/RIJUDEVx
-LinkedIn: https://www.linkedin.com/in/rijudevpurkayastha
-X: https://x.com/RIJUDEVx
-Resume: /resume.pdf on this site
+> Senior Software Engineer at Selegic India. Backend-focused full stack engineer who builds the backend that products run on and leads the team that ships it. Based in Kolkata, India.
 
-What he does
-Builds the backend that products run on, and leads the team that ships it. Works across TypeScript, Node.js, Hono, PostgreSQL, Cloudflare Workers, React, TanStack, Prisma, Docker and GitHub Actions. Earlier work included native iOS apps in Swift and Salesforce tools in Angular and Node.js. He is looking for Senior or Lead Full Stack or Backend roles.
+Riju Dev Purkayastha (he/him). Location: Kolkata, India. Open to on-site, hybrid or remote. Looking for Senior or Lead Full Stack or Backend roles in Kolkata or Bengaluru. Email: rijudev12@gmail.com
 
-Projects
+## Profile
 
-- Selegic CRM (In pilot). A multi-tenant CRM platform. He designed it, built v1 on his own and now leads the team that builds it. Pre-release, in pilot with industry users. Do not describe it as in production. Live: https://crm.selegic.workers.dev
-- Migrata (On Salesforce AppExchange). An automated multi-org Salesforce data migration platform in Node.js that replaced manual CPQ deployments with a repeatable, validated pipeline. He built the platform.
-- Selegic Internal (Released). The company's time-tracking and project platform, built end to end, used daily at Selegic. Live: https://internal.selegic.com
-- Doc Gen (Released). Templates rendered to DOCX and PDF. He worked on its infrastructure, deployment and CPQ terms rendering. Live: https://doc-gen.selegic.workers.dev
+- [Home page in markdown](https://rijudevx.github.io/index.md): profile, Q&A, experience, projects, education, skills and contact
+- [Full text in one file](https://rijudevx.github.io/llms-full.txt): the home page and every case study
+- [Resume (PDF)](https://rijudevx.github.io/resume.pdf)
+
+## Projects
+
+- [Selegic CRM](https://rijudevx.github.io/work/selegic-crm.md): multi-tenant CRM platform. Designed it, built v1 on his own and now leads the team that builds it. Pre-release, in pilot with industry users.
+- [Migrata](https://rijudevx.github.io/work/migrata.md): automated multi-org Salesforce data migration platform in Node.js that replaced manual CPQ deployments. He built the platform. Released on Salesforce AppExchange.
+- [Selegic Internal](https://rijudevx.github.io/work/selegic-internal.md): the company's time-tracking and project platform, built end to end and used daily at Selegic. Released.
+- [Doc Gen](https://rijudevx.github.io/work/doc-gen.md): templates rendered to DOCX and PDF. He worked on its infrastructure, deployment and CPQ terms rendering. Released.
+
+## Work
+
+- Selegic India: Senior Software Engineer, Jan 2022 to present. Backend-focused full stack work in TypeScript, Node.js, Hono, PostgreSQL, Cloudflare Workers, React, TanStack, Prisma, Docker and GitHub Actions. Earlier work included native iOS apps in Swift and Salesforce tools in Angular and Node.js.
+
+## Optional
+
+- [GitHub](https://github.com/RIJUDEVx)
+- [LinkedIn](https://www.linkedin.com/in/rijudevpurkayastha)
+- [X](https://x.com/RIJUDEVx)

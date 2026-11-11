@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
+import Banner from '../../components/Banner.svelte';
 import { statusLabel } from '../../data/site';
 
 export async function getStaticPaths() {
@@ -17,9 +18,10 @@ const s = statusLabel[d.status];
 <Base title={d.title} description={d.summary} page="work" work={{ slug: entry.id, ...d }}>
   <article>
     <header class="cs-head">
+      <div class="banner"><Banner client:visible /></div>
       <a class="back mono" href="/#work" data-sound="tap"><Icon name="back" /> all work</a>
       <span class="badge" data-tone={s.tone}>{s.text}</span>
-      <h1 class="display" transition:name={`title-${entry.id}`}>{d.title}</h1>
+      <h1 transition:name={`title-${entry.id}`}>{d.title}</h1>
       <p class="summary">{d.summary}</p>
       <dl class="meta mono">
         <div><dt>role</dt><dd>{d.role}</dd></div>
@@ -27,7 +29,7 @@ const s = statusLabel[d.status];
       </dl>
       {d.live && <a class="pill" href={d.live} target="_blank" rel="noopener" data-sound="tap">Live site <Icon name="arrow" /></a>}
       {d.stats.length > 0 && (
-        <dl class="stats">{d.stats.map((st) => <div><dt class="display">{st.value}</dt><dd class="mono muted">{st.label}</dd></div>)}</dl>
+        <dl class="stats">{d.stats.map((st) => <div><dt>{st.value}</dt><dd class="mono muted">{st.label}</dd></div>)}</dl>
       )}
     </header>
 
@@ -40,7 +42,7 @@ const s = statusLabel[d.status];
       <ul class="chips">{d.stack.map((t) => <li class="mono">{t}</li>)}</ul>
       <a class="next" href={`/work/${next.id}`} data-sound="tap">
         <span class="mono muted">next →</span>
-        <span class="display">{next.data.title}</span>
+        <span class="next-title">{next.data.title}</span>
         <span class="muted">{next.data.summary}</span>
       </a>
     </footer>
@@ -48,31 +50,35 @@ const s = statusLabel[d.status];
 </Base>
 
 <style>
-  .cs-head { padding: 48px var(--gutter) 40px; display: grid; gap: 14px; justify-items: start; }
-  .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; }
+  .cs-head { padding: 0 var(--gutter) 40px; display: grid; gap: 14px; justify-items: start; }
+  .banner {
+    justify-self: stretch; height: 144px; margin: 0 calc(-1 * var(--gutter)); position: relative; overflow: hidden;
+  }
+  .banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, var(--paper)); pointer-events: none; }
+  .back { margin-top: 20px; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; }
   .back :global(svg) { width: 14px; height: 14px; }
   .back:hover { color: var(--ink); }
-  h1 { font-size: clamp(3rem, 10vw, 5rem); }
-  .summary { margin: 0; font-size: 1.25rem; color: var(--text); max-width: 34ch; line-height: 1.45; }
-  .meta { display: flex; gap: 24px; margin: 0; }
-  .meta dt { color: var(--accent); } .meta dd { margin: 0; }
-  .stats { display: flex; flex-wrap: wrap; gap: 28px; margin: 8px 0 0; padding-top: 20px; border-top: 1px dashed var(--rule); width: 100%; }
-  .stats dt { font-size: 2.25rem; color: var(--ink); line-height: 1; }
+  h1 { margin: 8px 0 0; font-family: var(--font-sans); font-size: 2.25rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; color: var(--ink); }
+  .summary { margin: 0; font-size: 0.9375rem; color: var(--text); max-width: 46ch; line-height: 1.6; }
+  .meta { display: flex; gap: 24px; margin: 0; font-size: 0.75rem; }
+  .meta dt { color: var(--muted); } .meta dd { margin: 0; color: var(--text); }
+  .stats { display: flex; flex-wrap: wrap; gap: 28px; margin: 12px 0 0; width: 100%; }
+  .stats dt { font-family: var(--font-sans); font-size: 1.375rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); line-height: 1.2; }
   .stats dd { margin: 4px 0 0; font-size: 0.6875rem; }
 
-  .cs-body { padding: 8px var(--gutter) 40px; border-top: 1px dashed var(--rule); counter-reset: part; }
-  .cs-body :global(h2) { font-family: var(--font-display); font-size: 2rem; margin: 40px 0 12px; }
+  .cs-body { padding: 16px var(--gutter) 40px; counter-reset: part; }
+  .cs-body :global(h2) { font-family: var(--font-sans); font-size: 1.375rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.3; color: var(--ink); margin: 48px 0 12px; }
   .cs-body :global(h2::before) { counter-increment: part; content: '§0' counter(part); display: block; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); margin-bottom: 4px; }
-  .cs-body :global(h3) { font-size: 1.125rem; font-weight: 600; margin: 24px 0 6px; }
-  .cs-body :global(p), .cs-body :global(li) { font-size: 1.0625rem; }
+  .cs-body :global(h3) { font-size: 1.0625rem; font-weight: 600; color: var(--ink); margin: 24px 0 6px; }
+  .cs-body :global(p), .cs-body :global(li) { font-size: 0.9375rem; line-height: 1.7; color: var(--text); }
   .cs-body :global(ol) { padding-left: 1.2em; }
   .cs-body :global(img) { border: 1px solid var(--rule); border-radius: var(--radius); margin: 20px 0; }
 
-  .cs-foot { padding: 32px var(--gutter) 56px; border-top: 1px dashed var(--rule); display: grid; gap: 12px; }
+  .cs-foot { padding: 40px var(--gutter) 56px; display: grid; gap: 12px; }
   .cs-foot p { margin: 0; }
   .chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
   .chips li { padding: 3px 9px; border: 1px solid var(--rule); border-radius: 6px; color: var(--muted); }
   .next { margin-top: 24px; display: grid; gap: 4px; padding: 20px; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); text-decoration: none; transition: border-color 0.2s, transform 0.25s var(--ease); }
   .next:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
-  .next .display { font-size: 1.75rem; color: var(--ink); }
+  .next-title { font-size: 1.375rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.3; color: var(--ink); }
 </style>

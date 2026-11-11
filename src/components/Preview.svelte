@@ -136,7 +136,7 @@
     border: 1px solid var(--rule-strong); border-radius: 12px; box-shadow: var(--shadow);
     color: var(--text); font-size: 0.9375rem; line-height: 1.45; text-align: left;
   }
-  .title { font-size: 1.25rem; line-height: 1.1; color: var(--ink); }
+  .title { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: var(--ink); }
   .line { color: var(--text); }
   .cta { color: var(--muted); font-size: 0.75rem; }
 </style>

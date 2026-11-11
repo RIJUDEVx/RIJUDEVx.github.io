@@ -50,7 +50,8 @@
 </script>
 
 <div class="questions">
-  <p class="mono lead">before you hire me — go on, ask:</p>
+  <h2>Before you hire me</h2>
+  <p class="sub">go on, ask:</p>
 
   <div class="chips">
     {#each questions as item, i (item.q)}
@@ -80,20 +81,22 @@
 </div>
 
 <style>
-  .questions { margin-top: 28px; }
-  .lead { margin: 0 0 10px; color: var(--muted); font-size: 0.8125rem; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .questions { margin-top: 8px; }
+  h2 { font-size: 1.375rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.3; color: var(--ink); margin: 0; }
+  .sub { margin: 4px 0 0; font-size: 0.8125rem; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
   .chip { font-size: 0.8125rem; padding: 5px 11px; text-align: left; }
   .chip[aria-pressed='true'] {
     border-color: var(--accent); background: var(--accent-soft); color: var(--ink);
   }
 
-  .answer { margin-top: 14px; }
+  .answer { margin-top: 16px; }
   .bubble { display: flex; gap: 10px; align-items: flex-start; }
   .avatar {
-    flex: none; width: 22px; height: 22px; border-radius: 50%;
-    border: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink);
-    display: grid; place-items: center; font-family: var(--font-display); font-size: 0.75rem; line-height: 1;
+    flex: none; width: 22px; height: 22px; border-radius: 6px;
+    background: var(--ink); color: var(--paper);
+    display: grid; place-items: center; font-family: var(--font-sans); font-weight: 600;
+    font-size: 0.6875rem; letter-spacing: -0.02em; line-height: 1;
   }
   .card {
     flex: 1; min-width: 0; padding: 14px 16px; background: var(--surface);

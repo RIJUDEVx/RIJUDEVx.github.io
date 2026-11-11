@@ -4,6 +4,7 @@ import { profile, links } from '../data/site';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
+  <p class="greet" data-greeting></p>
   <p class="mono">© {year} {profile.name} · <Clock client:idle variant="footer" /></p>
   <ul>
     {links.map((l) => <li><a class="mono" href={l.href} data-sound="tap">{l.label.toLowerCase()}</a></li>)}
@@ -12,9 +13,26 @@ const year = new Date().getFullYear();
   <p class="mono hint">press <kbd>⌘</kbd> <kbd>K</kbd> to jump anywhere</p>
 </footer>
 
+<script>
+  // Greeting depends on the visitor's local hour, so it can only be set in the browser.
+  function greet() {
+    const el = document.querySelector<HTMLElement>('[data-greeting]');
+    if (!el) return;
+    const h = new Date().getHours();
+    el.textContent =
+      h >= 5 && h <= 11 ? "up early? go have breakfast first :)"
+      : h >= 12 && h <= 16 ? "shouldn't you be working right now? :)"
+      : h >= 17 && h <= 20 ? "done for the day? go do something fun :)"
+      : "up this late? go get some sleep :)";
+  }
+  greet();
+  document.addEventListener('astro:page-load', greet);
+</script>
+
 <style>
-  .site-footer { padding: 32px var(--gutter) 48px; border-top: 1px dashed var(--rule); display: grid; gap: 12px; color: var(--muted); }
+  .site-footer { padding: 40px var(--gutter) 48px; border-top: 1px solid var(--rule); display: grid; gap: 12px; color: var(--muted); }
   p { margin: 0; }
+  .greet { font-size: 0.8125rem; color: var(--text); min-height: 1.65em; }
   ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
   a { color: var(--muted); text-decoration: none; }
   a:hover { color: var(--ink); }

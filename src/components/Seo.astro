@@ -1,0 +1,170 @@
+---
+import { profile, links, education, stack, statusLabel } from '../data/site';
+import type { FaqItem, VideoMeta, WorkMeta } from '../lib/types';
+
+interface Props {
+  title: string;
+  description: string;
+  page?: 'home' | 'work';
+  work?: WorkMeta;
+  faq?: FaqItem[];
+  // Optional og:video. Nothing passes this yet. A short screen recording can be
+  // added at public/og/home.mp4 and passed as
+  // video={{ url: '/og/home.mp4', type: 'video/mp4', width: 1280, height: 720 }}.
+  video?: VideoMeta;
+}
+
+const { title, description, page = 'home', work, faq, video } = Astro.props;
+const site = Astro.site ?? new URL('https://rijudevx.github.io/');
+const origin = site.origin;
+const canonical = new URL(Astro.url.pathname, site);
+const w = page === 'work' ? work : undefined;
+
+const ogImage = new URL(w ? `/og/work/${w.slug}.png` : '/og/home.png', site).href;
+const ogAlt = w
+  ? `Case study: ${w.title}. ${w.summary}`
+  : `${profile.name}, ${profile.title} at ${profile.company.name}. Backend-focused full stack engineer.`;
+const videoUrl = video ? new URL(video.url, site).href : undefined;
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
+
+const personId = `${origin}/#person`;
+const websiteId = `${origin}/#website`;
+const homeUrl = `${origin}/`;
+const bio = 'Backend-focused full stack engineer. Senior Software Engineer at Selegic India, leads the Selegic CRM team.';
+
+// JSON-LD. Built only from site.ts and career-facts.md.
+const person = {
+  '@type': 'Person',
+  '@id': personId,
+  name: profile.name,
+  alternateName: 'RIJUDEVx',
+  jobTitle: profile.title,
+  description: bio,
+  url: homeUrl,
+  image: new URL('/og/home.png', site).href,
+  email: `mailto:${profile.email}`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Kolkata',
+    addressRegion: 'West Bengal',
+    addressCountry: 'IN',
+  },
+  worksFor: { '@type': 'Organization', name: profile.company.name, url: profile.company.url },
+  alumniOf: { '@type': 'CollegeOrUniversity', name: education.school },
+  sameAs: links.filter((l) => l.brand).map((l) => l.href),
+  knowsAbout: stack,
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': websiteId,
+  name: profile.name,
+  url: homeUrl,
+  inLanguage: 'en',
+  publisher: { '@id': personId },
+};
+
+const graph: Record<string, unknown>[] = [person, website];
+
+if (w) {
+  const appLike = w.status === 'pilot' || w.status === 'released';
+  graph.push({
+    '@type': appLike ? 'SoftwareApplication' : 'CreativeWork',
+    ...(appLike ? { applicationCategory: 'BusinessApplication' } : {}),
+    '@id': `${canonical.href}#work`,
+    name: w.title,
+    description: w.summary,
+    url: canonical.href,
+    author: { '@id': personId },
+    creativeWorkStatus: statusLabel[w.status].text,
+    keywords: w.stack,
+    image: ogImage,
+  });
+  graph.push({
+    '@type': 'BreadcrumbList',
+    '@id': `${canonical.href}#breadcrumb`,
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: 'Work', item: `${homeUrl}#work` },
+      { '@type': 'ListItem', position: 3, name: w.title, item: canonical.href },
+    ],
+  });
+} else {
+  graph.push({
+    '@type': 'ProfilePage',
+    '@id': `${homeUrl}#profilepage`,
+    url: homeUrl,
+    name: title,
+    description,
+    isPartOf: { '@id': websiteId },
+    mainEntity: { '@id': personId },
+    dateModified: new Date().toISOString(),
+  });
+  if (faq?.length) {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `${homeUrl}#faq`,
+      mainEntity: faq.map(({ q, a }) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    });
+  }
+}
+
+// Escape "<" so no string in the data can close the script tag early.
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<meta name="author" content={profile.name} />
+{googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+
+<meta property="og:site_name" content="Riju Dev Purkayastha" />
+<meta property="og:locale" content="en_IN" />
+<meta property="og:type" content={w ? 'article' : 'profile'} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:secure_url" content={ogImage} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={ogAlt} />
+{!w && <meta property="profile:first_name" content="Riju Dev" />}
+{!w && <meta property="profile:last_name" content="Purkayastha" />}
+{!w && <meta property="profile:username" content="RIJUDEVx" />}
+{w && <meta property="article:author" content={homeUrl} />}
+{w && <meta property="article:section" content="Case study" />}
+{videoUrl && <meta property="og:video" content={videoUrl} />}
+{videoUrl && <meta property="og:video:secure_url" content={videoUrl} />}
+{video && <meta property="og:video:type" content={video.type} />}
+{video && <meta property="og:video:width" content={String(video.width)} />}
+{video && <meta property="og:video:height" content={String(video.height)} />}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@RIJUDEVx" />
+<meta name="twitter:creator" content="@RIJUDEVx" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={ogAlt} />
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#141413" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
+
+<link rel="alternate" type="text/plain" href="/llms.txt" title="Riju Dev Purkayastha, as plain text for AI assistants" />
+<link rel="author" href="/llms.txt" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+{w && <link rel="alternate" type="text/markdown" href={`/work/${w.slug}.md`} />}
+
+<script type="application/ld+json" set:html={jsonLd} />
