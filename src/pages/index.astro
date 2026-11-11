@@ -16,6 +16,8 @@ import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
 import Pipeline from '../components/Pipeline.svelte';
 import WorkIndex from '../components/WorkIndex.svelte';
+import ExperienceToggle from '../components/ExperienceToggle.svelte';
+import GitHubGraph from '../components/GitHubGraph.astro';
 import ContribPulse from '../components/bento/ContribPulse.svelte';
 import StackKeys from '../components/bento/StackKeys.svelte';
 import DayDial from '../components/bento/DayDial.svelte';
@@ -78,12 +80,27 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     <WorkIndex client:visible items={items.map((it, i) => ({ ...it, year: year(work[i].data.years) }))} />
   </section>
 
+  <section class="sec" id="experience">
+    <h2 class="label mono">Experience</h2>
+    <ExperienceToggle client:visible {...experience} />
+  </section>
+
+  <section class="sec" id="activity">
+    <h2 class="label mono">Activity</h2>
+    <GitHubGraph user="RIJUDEVx" />
+  </section>
+
+  <section class="sec" id="ask" aria-label="Ask">
+    <p class="label mono">Ask</p>
+    <Questions client:visible questions={questions} />
+  </section>
+
   <section class="glance" id="glance" data-spotlight>
     <h2 class="label mono">At a glance</h2>
     <div class="grid">
-      <div class="t ask" id="ask"><Questions client:visible questions={questions} /></div>
-
       <div class="t now"><DayDial client:visible /></div>
+
+      <div class="t stack"><StackKeys client:visible items={keys} /></div>
 
       <div class="t edu">
         <span class="k mono">Education</span>
@@ -91,22 +108,6 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
         <p class="small ink">B.Tech, Computer Science</p>
         <p class="small muted">MAKAUT · {education.years}</p>
       </div>
-
-      <div class="t xp" id="experience">
-        <div class="xp-head"><span class="k mono">Experience</span><span class="mono muted small">{experience.dates}</span></div>
-        <h3>{experience.role} <span class="muted">· {experience.company}</span></h3>
-        <ol class="path">
-          {milestones.map((m, i) => (
-            <li class:list={{ now: i === milestones.length - 1 }}>
-              <span class="when mono">{m.when}</span>
-              <span class="dot" aria-hidden="true"></span>
-              <span class="what">{m.what}<span class="muted"> {m.detail}</span></span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <div class="t gh">{pulse ? <ContribPulse client:visible user="RIJUDEVx" {...pulse} /> : <a class="mono" href="https://github.com/RIJUDEVx">github.com/RIJUDEVx ↗</a>}</div>
 
       <div class="t writing">
         <div class="xp-head"><span class="k mono">Writing</span><span class="mono muted small">drafts</span></div>
@@ -117,7 +118,24 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
         </ul>
       </div>
 
-      <div class="t stack"><StackKeys client:visible items={keys} /></div>
+      <div class="t elsewhere">
+        <span class="k mono">Elsewhere</span>
+        <ul class="ew">
+          {social.map((l) => <li><a href={l.href} target="_blank" rel="noopener me" data-sound="tap"><Brand name={l.brand!} mono size={15} /><span>{l.label}</span><span class="arr" aria-hidden="true">↗</span></a></li>)}
+          <li><a href="/resume.pdf" data-sound="tap"><span class="ic" aria-hidden="true">⤓</span><span>Resume</span><span class="arr" aria-hidden="true">↗</span></a></li>
+          <li><a href="/llms.txt"><span class="ic mono" aria-hidden="true">{'{}'}</span><span>llms.txt</span><span class="arr" aria-hidden="true">↗</span></a></li>
+        </ul>
+      </div>
+
+      <a class="t play-tile" href="#pipeline" data-sound="tap" data-cursor="play">
+        <span class="k mono">Playground</span>
+        <div class="mini-board" aria-hidden="true">
+          <span class="col"></span><span class="col"></span><span class="col"></span><span class="col won"></span>
+          <i class="deal d1"></i><i class="deal d2"></i><i class="deal d3"></i>
+        </div>
+        <p class="small ink">Close a deal in a tiny CRM.</p>
+        <span class="mono go-play">play ↓</span>
+      </a>
     </div>
   </section>
 
@@ -207,7 +225,27 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   .t > * { position: relative; }
   .k { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
   .t p { margin: 0; }
-  .ask, .xp, .gh, .writing, .stack { grid-column: span 2; }
+  .stack, .writing { grid-column: span 2; }
+  .sec { padding: 88px 24px 0; max-width: 820px; }
+  .sec > .label { margin: 0 0 18px; }
+  #ask :global(h2), #ask :global(h2 + p) { display: none; }
+  .ew { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+  .ew a { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px; padding: 7px 8px; margin: 0 -8px; border-radius: 9px; color: var(--ink); text-decoration: none; font-size: 0.875rem; transition: background 0.15s; }
+  .ew a:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); }
+  .ew .ic { display: grid; place-items: center; font-size: 0.75rem; color: var(--text); }
+  .ew .arr { color: var(--muted); font-size: 0.75rem; transition: transform 0.2s var(--ease), color 0.2s; }
+  .ew a:hover .arr { transform: translate(2px, -2px); color: var(--ink); }
+  .play-tile { text-decoration: none; color: inherit; }
+  .mini-board { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; height: 78px; margin: 6px 0 4px; }
+  .mini-board .col { border-radius: 7px; background: color-mix(in oklab, var(--ink) 5%, transparent); box-shadow: inset 0 0 0 1px var(--rule); }
+  .mini-board .won { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ok) 45%, transparent); }
+  .deal { position: absolute; left: 4px; width: calc(25% - 12px); height: 14px; border-radius: 4px; background: var(--surface); box-shadow: 0 0 0 1px var(--rule-strong), 0 2px 6px -2px rgb(0 0 0 / 0.4); animation: hop 6s var(--ease) infinite; }
+  .d1 { top: 10px; } .d2 { top: 32px; animation-delay: -2s; } .d3 { top: 54px; animation-delay: -4s; }
+  @keyframes hop { 0%, 12% { transform: translateX(0); } 25%, 37% { transform: translateX(calc(100% + 13px)); } 50%, 62% { transform: translateX(calc(200% + 26px)); } 75%, 92% { transform: translateX(calc(300% + 39px)); background: color-mix(in oklab, var(--ok) 30%, var(--surface)); } 100% { transform: translateX(0); } }
+  .go-play { margin-top: auto; font-size: 0.6875rem; color: var(--muted); transition: color 0.2s; }
+  .play-tile:hover .go-play { color: var(--ink); }
+  .play-tile:hover { border-color: var(--rule-strong); }
+  @media (prefers-reduced-motion: reduce) { .deal { animation: none; } }
   .ask :global(h2) { font-size: 1.125rem !important; }
   .now .big { font-size: 1rem; color: var(--ink); margin-top: 8px; }
   .now .small { margin-top: auto; }
@@ -281,7 +319,8 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     .float { display: none; }
 
     .grid { grid-template-columns: 1fr; gap: 12px; }
-    .ask, .xp, .gh, .writing, .stack { grid-column: auto; }
+    .writing, .stack { grid-column: auto; }
+    .sec { padding: 40px 16px 0; }
     .t { border: 0; border-radius: 20px; padding: 16px; }
     .k { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-size: 0.8125rem; font-weight: 600; }
     .contact { padding: 40px 16px 32px; }
