@@ -3,6 +3,7 @@ import { profile, links, education, stack, statusLabel } from '../data/site';
 import type { FaqItem, VideoMeta, WorkMeta } from '../lib/types';
 
 interface Props {
+  noindex?: boolean;
   title: string;
   description: string;
   page?: 'home' | 'work';
@@ -14,7 +15,7 @@ interface Props {
   video?: VideoMeta;
 }
 
-const { title, description, page = 'home', work, faq, video } = Astro.props;
+const { title, description, page = 'home', work, faq, video, noindex = false } = Astro.props;
 const site = Astro.site ?? new URL('https://rijudevx.github.io/');
 const origin = site.origin;
 const canonical = new URL(Astro.url.pathname, site);
@@ -121,7 +122,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical.href} />
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1"} />
 <meta name="author" content={profile.name} />
 {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
 

@@ -18,8 +18,9 @@ interface Props {
   faq?: FaqItem[];
   work?: WorkMeta;
   video?: VideoMeta;
+  noindex?: boolean;
 }
-const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}`, page = 'home', faq, work, video } = Astro.props;
+const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}`, page = 'home', faq, work, video, noindex = false } = Astro.props;
 // Browser title is just the GitHub handle (Riju's call, 13 Nov 2026). The full name stays in og/meta/JSON-LD.
 const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
 ---
@@ -28,7 +29,7 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <Seo title={fullTitle} description={description} page={page} faq={faq} work={work} video={video} />
+    <Seo title={fullTitle} description={description} page={page} faq={faq} work={work} video={video} noindex={noindex} />
     <script is:inline>
       // Set the theme before first paint so there's no flash.
       (function () {
