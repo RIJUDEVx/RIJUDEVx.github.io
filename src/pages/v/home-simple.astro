@@ -8,6 +8,7 @@
 //  - Editorial (A): restraint, mono section labels, no ornament for its own sake.
 // Phones get iOS grouped lists and cards (see the 760px block at the bottom).
 import { getCollection } from 'astro:content';
+import VersionSwitch from '../../components/VersionSwitch.astro';
 import Base from '../../layouts/Base.astro';
 import Intro from '../../components/Intro.svelte';
 import Ascii from '../../components/Ascii.astro';
@@ -55,6 +56,7 @@ const spark = (() => {
 const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
 ---
 <Base title="Home, simple work" noindex>
+  <VersionSwitch />
 
   <section class="hero" id="top">
     <Ascii class="portrait" />

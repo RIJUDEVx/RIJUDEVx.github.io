@@ -3,6 +3,7 @@
 // One switch at the top, "tl;dr | the long version", changes every section at once.
 // Every project mentioned in the text is an underlined peek with a popup card.
 import { getCollection } from 'astro:content';
+import VersionSwitch from '../../components/VersionSwitch.astro';
 import Base from '../../layouts/Base.astro';
 import Ascii from '../../components/Ascii.astro';
 import Depth from '../../components/Depth.svelte';
@@ -43,6 +44,7 @@ const milestones = [
 ];
 ---
 <Base title="Simple" noindex>
+  <VersionSwitch />
   <article class="note">
     <header class="head">
       <Ascii class="face" />
