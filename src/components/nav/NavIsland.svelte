@@ -26,6 +26,7 @@
   });
   let copied = $state(false);
   let shell: HTMLElement | undefined = $state();
+  let zone: HTMLElement | undefined = $state();
   let closedEl: HTMLElement | undefined = $state();
   let openEl: HTMLElement | undefined = $state();
 
@@ -83,6 +84,11 @@
 
   // Magnetic lean: within ~160px the island drifts up to 5px toward the pointer.
   function onWindowMove(e: PointerEvent) {
+    // Left through the top edge and came back lower down: close once clearly below the zone.
+    if (open && zone && e.pointerType === 'mouse') {
+      const z = zone.getBoundingClientRect();
+      if (e.clientY > z.bottom + 12 || e.clientX < z.left - 12 || e.clientX > z.right + 12) softClose();
+    }
     if (!shell || e.pointerType !== 'mouse' || reducedMotion()) return;
     const r = shell.getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -125,13 +131,17 @@
 </script>
 
 <div class="anchor">
+  <!-- Hover zone: the island plus the gap above it (to the browser edge) and a margin
+       around it, so moving through the top padding never collapses the menu. -->
+  <div class="zone" bind:this={zone}
+    onpointerenter={(e) => { if (e.pointerType === 'mouse') setOpen(true); }}
+    onpointerleave={(e) => { if (e.pointerType === 'mouse' && e.clientY > 0) softClose(); }}
+  >
   <div
     class="island" class:open bind:this={shell} data-cursor="none"
     style={`${w.current ? `width:${w.current}px;height:${h.current}px;` : ''}transform:translate3d(${lean.current.x}px,${lean.current.y}px,0) scale(${lean.current.s});--mx:${light.x}%;--my:${light.y}%`}
     class:lit={light.on}
     role="navigation" aria-label="Site"
-    onpointerenter={(e) => { if (e.pointerType === 'mouse') setOpen(true); }}
-    onpointerleave={(e) => { if (e.pointerType === 'mouse') softClose(); }}
     onfocusin={() => setOpen(true)}
     onfocusout={(e) => { if (!shell?.contains(e.relatedTarget as Node)) softClose(); }}
   >
@@ -180,9 +190,11 @@
     {/if}
   </div>
 </div>
+</div>
 
 <style>
-  .anchor { position: fixed; top: 10px; left: 0; right: 0; z-index: 50; display: flex; justify-content: center; pointer-events: none; }
+  .anchor { position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; justify-content: center; pointer-events: none; }
+  .zone { pointer-events: auto; padding: 10px 28px 22px; }
   .island {
     --bg: #0b0b0a; --fg: #f5f4ef; --dim: rgb(245 244 239 / 0.5); --line: rgb(255 255 255 / 0.08);
     position: relative; pointer-events: auto; overflow: hidden; border-radius: 19px;
