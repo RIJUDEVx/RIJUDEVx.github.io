@@ -50,22 +50,59 @@
       scrollTo(t);
     };
 
+    // Where the reader actually is, per page, so a reload returns there
+    // (and never to a stale #section in the URL).
+    const key = () => `rd:scroll:${location.pathname}`;
+    let saveTimer = 0;
+    const save = () => {
+      clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        const y = Math.round(window.scrollY);
+        try { sessionStorage.setItem(key(), String(y)); } catch {}
+        // Astro's router saves scroll only on 'scrollend', which Lenis-driven scrolling
+        // often doesn't fire, so it would restore a stale position on reload. Keep it in sync.
+        if (history.state && history.state.scrollY !== y) {
+          try { history.replaceState({ ...history.state, scrollX: window.scrollX, scrollY: y }, ''); } catch {}
+        }
+      }, 120);
+    };
+    const dropHash = () => {
+      if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
+    };
+    const isReload = () => {
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      return nav?.type === 'reload';
+    };
+
+    let first = true;
     const onPageLoad = () => {
       lenis.resize();
+      if (first && isReload()) {
+        first = false;
+        let y: number | null = null;
+        try { const v = sessionStorage.getItem(key()); y = v === null ? null : Number(v); } catch {}
+        dropHash();
+        if (y !== null && !Number.isNaN(y)) { lenis.scrollTo(y, { immediate: true }); return; }
+      }
+      first = false;
       const t = location.hash ? resolve(location.hash) : 'top';
+      dropHash();
       if (t === null) return;
       scrollTo(t, true);
     };
 
     document.addEventListener('click', onClick);
     document.addEventListener('astro:page-load', onPageLoad);
-    // Mounted after the first page-load (client:only): handle an incoming hash now.
-    if (location.hash) onPageLoad();
+    window.addEventListener('scroll', save, { passive: true });
+    window.addEventListener('pagehide', () => { try { sessionStorage.setItem(key(), String(Math.round(window.scrollY))); } catch {} });
+    // Mounted after the first page-load (client:only): handle it now.
+    onPageLoad();
 
     return () => {
       cancelAnimationFrame(rafId);
       document.removeEventListener('click', onClick);
       document.removeEventListener('astro:page-load', onPageLoad);
+      window.removeEventListener('scroll', save);
       lenis.destroy();
     };
   });
