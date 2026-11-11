@@ -3,5 +3,5 @@
 import NavIsland from './nav/NavIsland.svelte';
 import MobileBar from './nav/MobileBar.svelte';
 ---
-<div transition:persist="nav-island"><NavIsland client:load /></div>
-<div transition:persist="nav-mobile"><MobileBar client:load /></div>
+<NavIsland client:load />
+<MobileBar client:load />

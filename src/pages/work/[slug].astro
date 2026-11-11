@@ -21,7 +21,7 @@ const s = statusLabel[d.status];
       <div class="banner"><Banner client:visible /></div>
       <a class="back mono" href="/#work" data-sound="tap"><Icon name="back" /> all work</a>
       <span class="badge" data-tone={s.tone}>{s.text}</span>
-      <h1 transition:name={`title-${entry.id}`}>{d.title}</h1>
+      <h1>{d.title}</h1>
       <p class="summary">{d.summary}</p>
       <dl class="meta mono">
         <div><dt>role</dt><dd>{d.role}</dd></div>

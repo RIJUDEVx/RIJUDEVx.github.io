@@ -140,3 +140,9 @@ h1, h2, h3 { color: var(--ink); font-weight: 500; margin: 0; }
   .badge { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 0.75rem; }
   .site-footer { padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important; }
 }
+
+/* Page changes are plain navigations (prefetched on hover), with the browser's own
+   cross-document view transition: a quick fade, no JavaScript router. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 160ms; animation-timing-function: var(--ease); }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }

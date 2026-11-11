@@ -43,7 +43,7 @@
       a.remove();
       return;
     }
-    const { navigate } = await import('astro:transitions/client');
+    const navigate = (url: string) => { location.href = url; };
     await navigate(href);
   }
 
@@ -84,7 +84,7 @@
       window.dispatchEvent(new CustomEvent('intro:replay'));
     };
     document.addEventListener('astro:page-load', again);
-    const { navigate } = await import('astro:transitions/client');
+    const navigate = (url: string) => { location.href = url; };
     await navigate('/');
   }
 

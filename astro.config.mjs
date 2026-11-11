@@ -8,5 +8,5 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://rijudevx.github.io',
   integrations: [svelte(), sitemap({ filter: (page) => !page.includes('/v/') && !page.includes('/writing/') })],
-  prefetch: { prefetchAll: true },
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 });
