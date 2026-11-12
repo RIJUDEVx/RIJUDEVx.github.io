@@ -48,7 +48,8 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 html, body { margin: 0; }
-body {
+body { overflow-x: clip; /* the home hero is wider than the column; never scroll sideways */
+
   background: var(--paper);
   color: var(--text);
   font-family: var(--font-sans);

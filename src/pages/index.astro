@@ -186,16 +186,17 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   .small { font-size: 0.8125rem; }
 
   /* Hero */
-  .hero { display: grid; grid-template-columns: auto 1fr; gap: 36px; align-items: center; padding: 112px var(--gutter) 28px; }
-  .portrait :global(pre) { font-size: 5px; }
+  /* The hero keeps its original 1120px width; it breaks out of the 720px column, centred on it. */
+  .hero { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center; padding: 112px 24px 32px; width: min(1120px, 100vw); position: relative; left: 50%; translate: -50% 0; }
+  .portrait :global(pre) { font-size: 7px; }
   .eyebrow { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 0.75rem; margin: 0; }
   .sep { opacity: 0.4; }
-  h1 { margin-top: 18px; font-size: 1.875rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; }
-  .sub { margin: 14px 0 0; color: var(--text); font-size: 0.875rem; }
+  h1 { margin-top: 22px; font-size: clamp(2rem, 3.8vw, 3.1rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 20ch; }
+  .sub { margin: 18px 0 0; color: var(--text); font-size: 0.9375rem; }
   .sub a { color: var(--ink); text-decoration-color: var(--rule-strong); }
-  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 26px; }
   .soc { display: contents; }
-  .icon { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
+  .icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
   .icon:hover { color: var(--ink); border-color: var(--rule-strong); }
   .about-wrap { padding-top: 8px; }
   .prose p { color: var(--text); font-size: 0.9375rem; line-height: 1.7; margin: 0 0 14px; }
@@ -256,8 +257,11 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   .contact .label { margin: 0; }
   .statement { margin: 0; font-size: 1.625rem; font-weight: 500; letter-spacing: -0.03em; line-height: 1.2; color: var(--ink); max-width: 26ch; }
 
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 96px; }
+    .portrait :global(pre) { font-size: 5.4px; }
+  }
   @media (max-width: 640px) {
-    .hero { grid-template-columns: 1fr; gap: 24px; padding-top: 96px; }
     .work { grid-template-columns: 1fr; }
     .grid { grid-template-columns: 1fr 1fr; }
   }
@@ -265,7 +269,7 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   /* Phones: iOS grouped lists and cards, system font and colours come from global.css. */
   @media (max-width: 760px) {
     .sec { padding-top: 40px; }
-    .hero { grid-template-columns: 1fr; padding: 72px var(--gutter) 8px; justify-items: center; text-align: center; }
+    .hero { grid-template-columns: 1fr; padding: 72px 16px 8px; justify-items: center; text-align: center; }
     .portrait :global(pre) { font-size: 4.6px; }
     .eyebrow { justify-content: center; }
     h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.03em; margin-inline: auto; }
