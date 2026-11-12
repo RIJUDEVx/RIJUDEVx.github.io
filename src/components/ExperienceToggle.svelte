@@ -125,7 +125,7 @@
   .seg button[aria-selected='true'] { color: var(--ink); }
   .seg button[aria-selected='true']::after { transform: scaleX(1); }
 
-  .panel { overflow: hidden; transition: height 0.3s var(--ease); margin-top: 14px; padding-left: 20px; }
+  .panel { overflow: hidden; transition: height 0.3s var(--ease); margin-top: 14px; }
   .tldr { margin: 0; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
   .long { list-style: none; margin: 0; padding: 0; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
   .long li { position: relative; padding-left: 1.25em; }

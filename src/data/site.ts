@@ -72,11 +72,11 @@ export const questions = [
 ];
 
 export type Status = 'pilot' | 'released' | 'withdrawn' | 'appexchange';
-export const statusLabel: Record<Status, { text: string; tone: 'ok' | 'pilot' | 'past' }> = {
+export const statusLabel: Record<Status, { text: string; short?: string; tone: 'ok' | 'pilot' | 'past' }> = {
   pilot: { text: 'In pilot', tone: 'pilot' },
   released: { text: 'Released', tone: 'ok' },
   appexchange: { text: 'On AppExchange', tone: 'ok' },
-  withdrawn: { text: 'Released, later withdrawn', tone: 'past' },
+  withdrawn: { text: 'Released, later withdrawn', short: 'Withdrawn', tone: 'past' },
 };
 
 // Inline mentions in the About paragraph that open a preview card.

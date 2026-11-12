@@ -70,4 +70,5 @@
   }
   .copy.pill:hover { border-color: var(--ink); }
   .copied { color: var(--ok); font-size: 0.75rem; min-height: 1em; }
+  .copied:empty { display: none; } /* no phantom gap beside the button */
 </style>

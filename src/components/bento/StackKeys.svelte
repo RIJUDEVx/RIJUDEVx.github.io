@@ -56,7 +56,8 @@
     background: color-mix(in oklab, var(--paper) 80%, #000); color: var(--ok);
     box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.4); letter-spacing: 0.04em;
   }
-  .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; }
+  .board { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 760px) { .board { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
   .key {
     position: relative; aspect-ratio: 1; border: 0; padding: 0; cursor: pointer; border-radius: 10px;
     background: linear-gradient(180deg, color-mix(in oklab, var(--surface) 70%, #fff 6%), var(--surface));
@@ -64,7 +65,7 @@
     transform: translateY(0); transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
   }
   .cap { position: absolute; inset: 6px; display: grid; place-items: center; border-radius: 7px; background: var(--paper); box-shadow: inset 0 0 0 1px var(--rule); }
-  .cap :global(svg) { width: 20px; height: 20px; filter: grayscale(1) opacity(0.75); transition: filter 0.15s; }
+  .cap :global(svg) { width: 50%; height: 50%; max-width: 22px; max-height: 22px; filter: grayscale(1) opacity(0.85); transition: filter 0.15s; }
   .key.lit { transform: translateY(-2px); }
   .key.lit .cap :global(svg) { filter: none; }
   .key.down { transform: translateY(3px); box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 0 0 color-mix(in oklab, var(--rule-strong) 90%, #000), 0 1px 3px rgb(0 0 0 / 0.3); }

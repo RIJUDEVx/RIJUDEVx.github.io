@@ -1,0 +1,85 @@
+---
+// Pixel portrait: a 48 x 58 px image scaled up with hard edges. The <img> paints
+// immediately (it is inlined); the script then swaps in a canvas that resolves
+// from coarse blocks to full detail, and re-pixelates under the cursor.
+import src from '../assets/portrait.png?inline';
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+---
+<figure class:list={['pixel', cls]}>
+  <img src={src} width="48" height="58" alt="Pixel portrait of Riju Dev Purkayastha" data-pixel decoding="sync" />
+</figure>
+
+<script>
+  const img = document.querySelector<HTMLImageElement>('img[data-pixel]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (img && !reduce) {
+    const start = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      const cv = document.createElement('canvas');
+      cv.width = W; cv.height = H; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', img.alt);
+      const ctx = cv.getContext('2d')!;
+      const tmp = document.createElement('canvas');
+      const tctx = tmp.getContext('2d')!;
+      ctx.imageSmoothingEnabled = false;
+
+      // Draw the whole portrait as if it were only `cols` pixels wide.
+      const drawAt = (cols: number) => {
+        const rows = Math.max(1, Math.round((cols * H) / W));
+        tmp.width = cols; tmp.height = rows;
+        tctx.imageSmoothingEnabled = true;
+        tctx.clearRect(0, 0, cols, rows);
+        tctx.drawImage(img, 0, 0, cols, rows);
+        ctx.clearRect(0, 0, W, H);
+        ctx.drawImage(tmp, 0, 0, cols, rows, 0, 0, W, H);
+      };
+      const full = () => { ctx.clearRect(0, 0, W, H); ctx.drawImage(img, 0, 0); };
+
+      const steps = [3, 4, 6, 8, 12, 16, 24, W];
+      let i = 0;
+      const tick = () => {
+        if (steps[i] === W) full(); else drawAt(steps[i]);
+        if (++i < steps.length) setTimeout(tick, 75);
+      };
+      drawAt(steps[0]);
+      img.replaceWith(cv);
+      i = 1;
+      setTimeout(tick, 75);
+
+      // Under the cursor the picture falls back to big blocks.
+      if (!matchMedia('(pointer: fine)').matches) return;
+      const B = 4, R = 9;
+      let raf = 0;
+      cv.addEventListener('pointermove', (e) => {
+        const r = cv.getBoundingClientRect();
+        const cx = ((e.clientX - r.left) / r.width) * W, cy = ((e.clientY - r.top) / r.height) * H;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          full();
+          const data = ctx.getImageData(0, 0, W, H);
+          for (let by = 0; by < H; by += B) for (let bx = 0; bx < W; bx += B) {
+            if (Math.hypot(bx + B / 2 - cx, by + B / 2 - cy) > R) continue;
+            let rr = 0, g = 0, b = 0, n = 0;
+            for (let y = by; y < Math.min(H, by + B); y++) for (let x = bx; x < Math.min(W, bx + B); x++) {
+              const k = (y * W + x) * 4; if (data.data[k + 3] < 128) continue;
+              rr += data.data[k]; g += data.data[k + 1]; b += data.data[k + 2]; n++;
+            }
+            if (n < (B * B) / 2) continue;
+            ctx.fillStyle = `rgb(${(rr / n) | 0} ${(g / n) | 0} ${(b / n) | 0})`;
+            ctx.fillRect(bx, by, B, B);
+          }
+        });
+      });
+      cv.addEventListener('pointerleave', () => { cancelAnimationFrame(raf); full(); });
+    };
+    if (img.complete && img.naturalWidth) start(); else img.addEventListener('load', start, { once: true });
+  }
+</script>
+
+<style>
+  .pixel { margin: 0; line-height: 0; }
+  .pixel :global(img), .pixel :global(canvas) {
+    display: block; width: var(--pw, 240px); height: auto; aspect-ratio: 48 / 58;
+    image-rendering: pixelated; image-rendering: crisp-edges; image-rendering: pixelated;
+  }
+</style>

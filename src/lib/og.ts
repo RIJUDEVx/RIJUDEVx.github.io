@@ -6,7 +6,6 @@ import { readFileSync } from 'node:fs';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { profile, statusLabel, type Status } from '../data/site';
-import { portrait } from '../data/portrait';
 
 // Colour tokens from src/styles/global.css (dark theme).
 export const colors = {
@@ -115,15 +114,12 @@ function frame(body: Node[]): Node {
 }
 
 // Home card, after the reference portfolios (Krishna's drawing of himself, Kislay's
-// photo card): the ASCII portrait fills the right half, the name sits on the left.
+// photo card): the pixel portrait stands on the right, the name sits on the left.
 // Name only, no designation.
 export function homeCard(): Node {
-  const lines = portrait.split('\n');
-  const art = el('div', { position: 'absolute', right: 40, top: 28, flexDirection: 'column' },
-    lines.map((l, i) => el('div', {
-      fontFamily: MONO, fontSize: 12.6, lineHeight: 1, height: 13.4, whiteSpace: 'pre', letterSpacing: 0.4,
-      color: colors.paper, opacity: Math.max(0.25, 1 - Math.max(0, i - 28) * 0.05),
-    }, l || ' ')));
+  // The pixel portrait, pre-scaled 9x with hard edges (see docs/portrait.md).
+  const png = readFileSync('src/assets/portrait-og.png') // builds run from the project root;
+  const art: Node = { type: 'img', props: { src: `data:image/png;base64,${png.toString('base64')}`, width: 432, height: 522, style: { position: 'absolute', right: 84, top: H - 522 } } };
   const left = el('div', { position: 'absolute', left: PAD, top: PAD, bottom: PAD, width: 520, flexDirection: 'column', justifyContent: 'space-between' }, [
     el('div', { fontFamily: MONO, fontSize: 22, color: colors.muted, letterSpacing: 0.4 }, 'rijudevx.github.io'),
     el('div', { flexDirection: 'column' }, [
@@ -136,7 +132,6 @@ export function homeCard(): Node {
   return el('div', { position: 'relative', width: W, height: H, background: colors.ink, fontFamily: SANS, overflow: 'hidden' }, [
     dotGrid(W, H),
     art,
-    el('div', { position: 'absolute', left: 0, top: 0, width: 700, height: H, backgroundImage: `linear-gradient(90deg, ${colors.ink} 62%, rgba(20,20,19,0))` }),
     left,
   ]);
 }
