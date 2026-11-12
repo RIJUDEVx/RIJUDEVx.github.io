@@ -140,7 +140,7 @@ h1, h2, h3 { color: var(--ink); font-weight: 500; margin: 0; }
   .pill:hover { transform: none; border-color: transparent; }
   .pill:active { transform: scale(0.97); opacity: 0.8; }
   .badge { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 0.75rem; }
-  .site-footer { padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important; }
+  .site-footer { padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important; }
 }
 
 /* Page changes are plain navigations (prefetched on hover), with the browser's own

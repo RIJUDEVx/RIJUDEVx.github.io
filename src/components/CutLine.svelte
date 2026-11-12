@@ -2,7 +2,7 @@
   import { onMount, tick, type Snippet } from 'svelte';
   import { play } from '../lib/sound';
 
-  let { label, children }: { label: string; children?: Snippet } = $props();
+  let { label, hint = '✂ drag to cut · or click', children }: { label: string; hint?: string; children?: Snippet } = $props();
 
   const HANDLE = 32; // px, the scissors' hit area
   const HALF = HANDLE / 2;
@@ -252,7 +252,7 @@
       </svg>
     </button>
   </div>
-  <p class="hint mono" class:gone={hinted}>✂ drag to cut · or click</p>
+  <p class="hint mono" class:gone={hinted}>{hint}</p>
 
   <div class="body" bind:this={body} class:closed={!opened} inert={!opened}>
     {@render children?.()}
