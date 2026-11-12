@@ -12,10 +12,13 @@ Riju Dev Purkayastha (he/him). Location: Kolkata, India. Open to on-site, hybrid
 
 ## Projects
 
-- [Selegic CRM](https://rijudevx.github.io/work/selegic-crm.md): multi-tenant CRM platform. Designed it, built v1 on his own and now leads the team that builds it. Pre-release, in pilot with industry users.
-- [Migrata](https://rijudevx.github.io/work/migrata.md): automated multi-org Salesforce data migration platform in Node.js that replaced manual CPQ deployments. He built the platform. Released on Salesforce AppExchange.
-- [Selegic Internal](https://rijudevx.github.io/work/selegic-internal.md): the company's time-tracking and project platform, built end to end and used daily at Selegic. Released.
-- [Doc Gen](https://rijudevx.github.io/work/doc-gen.md): templates rendered to DOCX and PDF. He worked on its infrastructure, deployment and CPQ terms rendering. Released.
+- [Selegic CRM](https://rijudevx.github.io/work/selegic-crm/): A multi-tenant CRM platform. I designed it, built v1 on my own and now lead the team that builds it.
+- [Migrata](https://rijudevx.github.io/work/migrata/): Automated multi-org Salesforce data migration that replaced manual CPQ deployments with a repeatable, validated pipeline.
+- [Selegic Internal](https://rijudevx.github.io/work/selegic-internal/): The company's time-tracking and project platform, built end to end.
+- [Doc Gen](https://rijudevx.github.io/work/doc-gen/): A service that turns templates into DOCX and PDF documents. I worked on its infrastructure, deployment and CPQ terms rendering.
+- [AttentaFit & Attenta Yoga](https://rijudevx.github.io/work/attenta-ios/): Native iOS fitness and wellness apps. I was the top contributor on AttentaFit and worked on Attenta Yoga.
+- [Switch to Classic](https://rijudevx.github.io/work/switch-to-classic/): A Chrome extension that switches Salesforce between Lightning and Classic. I built it as an intern and maintained it for three years.
+- [Remote Tooling](https://rijudevx.github.io/work/remote-tooling/): Tools for managing Salesforce field-level security and permission sets: Angular front ends and Node.js services.
 
 ## Work
 

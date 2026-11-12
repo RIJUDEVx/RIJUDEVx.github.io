@@ -5,18 +5,20 @@
 import { Spring } from 'svelte/motion';
 import { profile } from '../data/site';
 
+// Labels match the section names on the page.
 export const navItems = [
-  { id: 'work', label: 'Projects', href: '/#work' },
-  { id: 'glance', label: 'Experience', href: '/#experience' },
-  { id: 'pipeline', label: 'Playground', href: '/#pipeline' },
-  { id: 'contact', label: 'Contact', href: '/#contact' },
+  { id: 'work', label: 'projects', href: '/#work' },
+  { id: 'experience', label: 'experience', href: '/#experience' },
+  { id: 'ask', label: 'before you hire me', href: '/#ask' },
+  { id: 'pipeline', label: 'take my pager', href: '/#pipeline' },
+  { id: 'contact', label: 'say hi', href: '/#contact' },
 ] as const;
 
 export const handle = profile.handle;
 
 const sectionLabel: Record<string, string> = {
-  top: 'Home', about: 'About', ask: 'Before you hire me', experience: 'Experience', work: 'Projects',
-  pipeline: 'Playground', activity: 'Activity', glance: 'At a glance', education: 'Education', skills: 'Skills', contact: 'Contact',
+  top: 'Home', about: 'reading: about', work: 'reading: projects', experience: 'reading: experience', activity: 'reading: experience',
+  ask: 'reading: before you hire me', stack: 'reading: the stack', pipeline: 'playing: take my pager', contact: 'say hi?',
 };
 
 export const reducedMotion = () =>
