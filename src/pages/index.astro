@@ -1,7 +1,8 @@
 ---
 // Home. v1's single centred column (720px, every section on the same left edge)
 // and v1's project cards, with the current hero, Experience, Activity, Ask,
-// "at a glance" bento, Playground and Contact.
+// Stack, Playground and Contact. v1's tagline sits above the cut line, and the
+// projects in the about text are underlined peeks with popup cards.
 // Phones get iOS grouped lists and cards (see the 760px block at the bottom).
 import { getCollection } from 'astro:content';
 import VersionSwitch from '../components/VersionSwitch.astro';
@@ -16,16 +17,21 @@ import Pipeline from '../components/Pipeline.svelte';
 import ExperienceToggle from '../components/ExperienceToggle.svelte';
 import GitHubGraph from '../components/GitHubGraph.astro';
 import StackKeys from '../components/bento/StackKeys.svelte';
-import DayDial from '../components/bento/DayDial.svelte';
 import Brand from '../components/Brand.astro';
+import Icon from '../components/Icon.astro';
+import Peek from '../components/Peek.svelte';
 import { profile, links, questions, experience, statusLabel, stackIcons, education } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
-const writing = await getCollection('writing');
+const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
+const P = Object.fromEntries(work.map((w) => [w.id, {
+  href: `/work/${w.id}`, title: w.data.title, area: w.data.area, years: year(w.data.years),
+  status: statusLabel[w.data.status].text, tone: statusLabel[w.data.status].tone,
+  summary: w.data.summary, stats: w.data.stats,
+}]));
 const social = links.filter((l) => l.brand);
 const brandFiles = import.meta.glob('../assets/brands/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../assets/brands/${s.icon}.svg`] ?? '').replace(/<\?xml[^>]*>/, '').replace(/\s(width|height)="[^"]*"/g, '') }));
-const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
 ---
 <Base page="home" faq={questions}>
   <VersionSwitch />
@@ -34,7 +40,7 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   <section class="hero" id="top">
     <Ascii class="portrait" />
     <div class="copy">
-      <p class="eyebrow mono"><span>{profile.handle}</span><span class="sep">/</span><Clock client:load variant="footer" /></p>
+      <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep">·</span><Icon name="clock" /><Clock client:load variant="hero" /></p>
       <h1>
         I'm Riju. I build backend platforms, Salesforce tooling and native apps,{' '}
         <span class="dim">and lead the team behind Selegic CRM.</span>
@@ -42,16 +48,17 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
       <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · 4+ years · {work.length} projects</p>
       <div class="cta">
         <CopyEmail client:load email={profile.email} big />
-        <a class="pill" href="/resume.pdf" data-sound="tap">Resume</a>
+        <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
         <span class="soc">{social.map((l) => <a class="icon" href={l.href} target="_blank" rel="noopener me" aria-label={l.label} data-sound="tap"><Brand name={l.brand!} mono size={16} /></a>)}</span>
       </div>
     </div>
   </section>
 
   <div class="sec about-wrap">
+    <p class="tagline">{profile.tagline}</p>
     <CutLine client:visible label="Cut along the line to read more">
       <div class="prose" id="about">
-        <p>I started at Selegic as an intern in January 2022, building a Chrome extension and Salesforce admin tools. Since then I've shipped native iOS apps, Migrata on Salesforce AppExchange, the company's time-tracking platform, and Selegic CRM, which I designed and now lead.</p>
+        <p>I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
         <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
         <p class="mono muted">{profile.workModes}</p>
       </div>
@@ -95,48 +102,9 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     <Questions client:visible questions={questions} />
   </section>
 
-  <section class="sec glance" id="glance" data-spotlight>
-    <h2 class="label mono">At a glance</h2>
-    <div class="grid">
-      <div class="t now"><DayDial client:visible /></div>
-
-      <div class="t stack"><StackKeys client:visible items={keys} /></div>
-
-      <div class="t edu">
-        <span class="k mono">Education</span>
-        <p class="gpa">{education.cgpa}<span>CGPA</span></p>
-        <p class="small ink">B.Tech, Computer Science</p>
-        <p class="small muted">MAKAUT · {education.years}</p>
-      </div>
-
-      <div class="t writing">
-        <div class="xp-head"><span class="k mono">Writing</span><span class="mono muted small">drafts</span></div>
-        <ul class="posts">
-          {writing.map((p) => (
-            <li><a href={`/writing/${p.id}`} data-sound="tap"><span class="pt">{p.data.title}</span><span class="badge">Draft</span></a></li>
-          ))}
-        </ul>
-      </div>
-
-      <div class="t elsewhere">
-        <span class="k mono">Elsewhere</span>
-        <ul class="ew">
-          {social.map((l) => <li><a href={l.href} target="_blank" rel="noopener me" data-sound="tap"><Brand name={l.brand!} mono size={15} /><span>{l.label}</span><span class="arr" aria-hidden="true">↗</span></a></li>)}
-          <li><a href="/resume.pdf" data-sound="tap"><span class="ic" aria-hidden="true">⤓</span><span>Resume</span><span class="arr" aria-hidden="true">↗</span></a></li>
-          <li><a href="/llms.txt"><span class="ic mono" aria-hidden="true">{'{}'}</span><span>llms.txt</span><span class="arr" aria-hidden="true">↗</span></a></li>
-        </ul>
-      </div>
-
-      <a class="t play-tile" href="#pipeline" data-sound="tap" data-cursor="play">
-        <span class="k mono">Playground</span>
-        <div class="mini-board" aria-hidden="true">
-          <span class="col"></span><span class="col"></span><span class="col"></span><span class="col won"></span>
-          <i class="deal d1"></i><i class="deal d2"></i><i class="deal d3"></i>
-        </div>
-        <p class="small ink">Close a deal in a tiny CRM.</p>
-        <span class="mono go-play">play ↓</span>
-      </a>
-    </div>
+  <section class="sec" id="stack">
+    <h2 class="label mono">Stack</h2>
+    <div class="keys"><StackKeys client:visible items={keys} /></div>
   </section>
 
   <section class="sec play" id="pipeline">
@@ -154,24 +122,6 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     </div>
   </section>
 
-  <script>
-    // One spotlight across the bento grid.
-    function spot() {
-      const g = document.querySelector<HTMLElement>('[data-spotlight]');
-      if (!g || g.dataset.bound || !matchMedia('(pointer: fine)').matches) return;
-      g.dataset.bound = '1';
-      g.addEventListener('pointermove', (e) => {
-        for (const t of g.querySelectorAll<HTMLElement>('.t')) {
-          const r = t.getBoundingClientRect();
-          t.style.setProperty('--x', `${e.clientX - r.left}px`);
-          t.style.setProperty('--y', `${e.clientY - r.top}px`);
-        }
-      });
-    }
-    const init = () => { spot(); };
-    init();
-    document.addEventListener('astro:page-load', init);
-  </script>
 </Base>
 
 <style>
@@ -189,8 +139,10 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   /* The hero keeps its original 1120px width; it breaks out of the 720px column, centred on it. */
   .hero { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center; padding: 112px 24px 32px; width: min(1120px, 100vw); position: relative; left: 50%; translate: -50% 0; }
   .portrait :global(pre) { font-size: 7px; }
-  .eyebrow { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 0.75rem; margin: 0; }
-  .sep { opacity: 0.4; }
+  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 0.8125rem; margin: 0; }
+  .eyebrow .mono { font-size: 0.75rem; }
+  .eyebrow :global(svg) { width: 14px; height: 14px; }
+  .sep { margin: 0 2px; opacity: 0.4; }
   h1 { margin-top: 22px; font-size: clamp(2rem, 3.8vw, 3.1rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 20ch; }
   .sub { margin: 18px 0 0; color: var(--text); font-size: 0.9375rem; }
   .sub a { color: var(--ink); text-decoration-color: var(--rule-strong); }
@@ -218,40 +170,8 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
 
   #ask :global(h2), #ask :global(h2 + p) { display: none; }
 
-  /* At a glance: three columns that fit the 720px page, rows of 1 + 2. */
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .t { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--rule); }
-  .t::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: radial-gradient(300px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklab, var(--accent) 9%, transparent), transparent 60%); }
-  .grid:hover .t::before { opacity: 1; }
-  .t > * { position: relative; }
-  .k { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-  .t p { margin: 0; }
-  .stack, .writing, .play-tile { grid-column: span 2; }
-  .ew { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
-  .ew a { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 10px; padding: 6px 8px; margin: 0 -8px; border-radius: 9px; color: var(--ink); text-decoration: none; font-size: 0.875rem; transition: background 0.15s; }
-  .ew a:hover { background: color-mix(in oklab, var(--ink) 6%, transparent); }
-  .ew .ic { display: grid; place-items: center; font-size: 0.75rem; color: var(--text); }
-  .ew .arr { color: var(--muted); font-size: 0.75rem; transition: transform 0.2s var(--ease), color 0.2s; }
-  .ew a:hover .arr { transform: translate(2px, -2px); color: var(--ink); }
-  .play-tile { text-decoration: none; color: inherit; }
-  .mini-board { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; height: 96px; margin: 6px 0 4px; }
-  .mini-board .col { border-radius: 8px; background: color-mix(in oklab, var(--ink) 5%, transparent); box-shadow: inset 0 0 0 1px var(--rule); }
-  .mini-board .won { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ok) 45%, transparent); }
-  .deal { position: absolute; left: 5px; width: calc(25% - 14px); height: 18px; border-radius: 5px; background: var(--surface); box-shadow: 0 0 0 1px var(--rule-strong), 0 2px 6px -2px rgb(0 0 0 / 0.4); animation: hop 6s var(--ease) infinite; }
-  .d1 { top: 10px; } .d2 { top: 39px; animation-delay: -2s; } .d3 { top: 68px; animation-delay: -4s; }
-  @keyframes hop { 0%, 12% { transform: translateX(0); } 25%, 37% { transform: translateX(calc(100% + 14px)); } 50%, 62% { transform: translateX(calc(200% + 28px)); } 75%, 92% { transform: translateX(calc(300% + 42px)); background: color-mix(in oklab, var(--ok) 30%, var(--surface)); } 100% { transform: translateX(0); } }
-  .go-play { margin-top: auto; font-size: 0.6875rem; color: var(--muted); transition: color 0.2s; }
-  .play-tile:hover .go-play { color: var(--ink); }
-  .play-tile:hover { border-color: var(--rule-strong); }
-  @media (prefers-reduced-motion: reduce) { .deal { animation: none; } }
-  .gpa { margin: auto 0 4px !important; font-size: 2.5rem; font-weight: 600; letter-spacing: -0.05em; color: var(--ink); line-height: 1; }
-  .gpa span { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; color: var(--muted); margin-left: 6px; }
-  .xp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .posts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
-  .posts a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); font-size: 0.9375rem; letter-spacing: -0.01em; }
-  .posts li:last-child a { border-bottom: 0; }
-  .posts a:hover .pt { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
-
+  .tagline { margin: 0 0 12px; font-size: 1rem; color: var(--ink); }
+  .keys { max-width: 560px; }
   .play-lead { margin: -8px 0 18px; color: var(--muted); font-size: 0.875rem; }
   .contact { padding-bottom: 72px; display: grid; gap: 16px; }
   .contact .label { margin: 0; }
@@ -263,7 +183,6 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
   }
   @media (max-width: 640px) {
     .work { grid-template-columns: 1fr; }
-    .grid { grid-template-columns: 1fr 1fr; }
   }
 
   /* Phones: iOS grouped lists and cards, system font and colours come from global.css. */
@@ -293,10 +212,6 @@ const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{
     .card .cs { font-size: 0.875rem; }
     .tags, .stats { display: none; }
 
-    .grid { grid-template-columns: 1fr; }
-    .stack, .writing, .play-tile { grid-column: auto; }
-    .t { border: 0; border-radius: 20px; padding: 16px; }
-    .k { font-family: var(--font-sans); text-transform: none; letter-spacing: 0; font-size: 0.8125rem; font-weight: 600; }
     .contact { padding-bottom: 32px; }
     .contact .cta { display: grid; grid-template-columns: 1fr; }
     .contact .cta > :global(*) { justify-content: center; }
