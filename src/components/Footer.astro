@@ -10,6 +10,11 @@ const year = new Date().getFullYear();
     {links.map((l) => <li><a class="mono" href={l.href} data-sound="tap">{l.label.toLowerCase()}</a></li>)}
     <li><a class="mono" href="/llms.txt">llms.txt</a></li>
   </ul>
+  <p class="mono player">
+    <button type="button" data-music aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-music-label>play the 8-bit loop</span></button>
+    <span class="sep">·</span>
+    <button type="button" data-mute aria-pressed="false">sound on</button>
+  </p>
   <p class="mono hint">press <kbd>⌘</kbd> <kbd>K</kbd> to jump anywhere</p>
   <p class="mono hint">psst, this is a backend dev's site. press <kbd>D</kbd> to deploy</p>
 </footer>
@@ -28,6 +33,22 @@ const year = new Date().getFullYear();
   }
   greet();
   document.addEventListener('astro:page-load', greet);
+
+  // Music and sound switches.
+  import { setMusic, musicPlaying, resumeMusic, isMuted, setMuted } from '../lib/sound';
+  const mBtn = document.querySelector<HTMLButtonElement>('[data-music]');
+  const mLabel = document.querySelector<HTMLElement>('[data-music-label]');
+  const muteBtn = document.querySelector<HTMLButtonElement>('[data-mute]');
+  const paintMusic = () => {
+    const on = musicPlaying();
+    mBtn?.setAttribute('aria-pressed', String(on)); mBtn?.classList.toggle('on', on);
+    if (mLabel) mLabel.textContent = on ? 'now playing: hooghly loop · stop' : 'play the 8-bit loop';
+  };
+  const paintMute = () => { if (muteBtn) { muteBtn.textContent = isMuted() ? 'sound off' : 'sound on'; muteBtn.setAttribute('aria-pressed', String(isMuted())); } };
+  mBtn?.addEventListener('click', () => setMusic(!musicPlaying()));
+  muteBtn?.addEventListener('click', () => setMuted(!isMuted()));
+  addEventListener('music:change', paintMusic); addEventListener('sound:change', paintMute);
+  paintMute(); resumeMusic();
 
   // Press D: a pretend deploy runs in the corner. Nothing is deployed.
   import { play } from '../lib/sound';
@@ -61,6 +82,15 @@ const year = new Date().getFullYear();
   a { color: var(--muted); text-decoration: none; }
   a:hover { color: var(--ink); }
   kbd { font-family: var(--font-mono); font-size: 0.6875rem; border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+  .player { display: flex; align-items: center; gap: 8px; }
+  .player button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--text); }
+  .player button:hover { color: var(--ink); }
+  .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+  .eq i { width: 2px; height: 3px; background: currentColor; }
+  .on .eq i { animation: eq 0.6s steps(4) infinite alternate; }
+  .on .eq i:nth-child(2) { animation-delay: -0.2s; } .on .eq i:nth-child(3) { animation-delay: -0.45s; } .on .eq i:nth-child(4) { animation-delay: -0.1s; }
+  .on { color: var(--ok) !important; }
+  @keyframes eq { to { height: 10px; } }
   @media (hover: none) { .hint { display: none; } }
   :global(.deploy) {
     position: fixed; left: 20px; bottom: 20px; z-index: 80; min-width: 300px; padding: 14px 16px; border-radius: 12px;

@@ -8,6 +8,8 @@
   let phase = $state<Phase>('idle');
   let run = $state(0);
   let liftMs = $state(700);
+  let visits = $state(2);
+  let holdMs = $state(1800);
 
   // Letters grouped by word, with a running index for the stagger delay.
   const words = $derived.by(() => {
@@ -43,7 +45,11 @@
     clearTimers();
     phase = 'playing';
     liftMs = LIFT;
-    holdTimer = setTimeout(() => lift(LIFT), HOLD);
+    // Returning visitors get a shorter loader (see the two extra stages below).
+    const kind = document.documentElement.dataset.introKind ?? 'name';
+    try { visits = parseInt(localStorage.getItem('rd:visits') || '1', 10) || 1; } catch {}
+    holdMs = kind === 'name' ? HOLD : 1500;
+    holdTimer = setTimeout(() => lift(LIFT), holdMs);
     skipEl?.focus({ preventScroll: true });
   }
 
@@ -79,6 +85,7 @@
     if (reducedMotion()) return;
     returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     window.scrollTo(0, 0);
+    document.documentElement.dataset.introKind = 'name';
     document.documentElement.dataset.intro = 'pending';
     run++; // remount the letters so the stagger plays again
     start();
@@ -121,13 +128,14 @@
   class="overlay"
   class:exit={phase === 'exit'}
   style:--lift={`${liftMs}ms`}
+  style:--hold={`${holdMs}ms`}
   role="dialog"
   aria-modal="true"
   aria-label="Introduction"
   onclick={skip}
 >
   {#key run}
-    <div class="stage">
+    <div class="stage v-name">
       <p class="name" role="presentation">
         <span class="sr-only">{name}</span>
         {#each words as word}
@@ -135,6 +143,18 @@
         {/each}
       </p>
       <p class="caption mono">senior software engineer · kolkata</p>
+    </div>
+    <!-- Second visit, fourth, sixth…: a terminal logging you back in. -->
+    <div class="stage v-boot mono" aria-hidden="true">
+      <p style:--i={0}><span class="pr">$</span> ssh visitor@rijudevx</p>
+      <p style:--i={1}>last login: visit no. {visits - 1}</p>
+      <p style:--i={2} class="ok">✓ recognised. skipping the long intro.</p>
+      <p style:--i={3}><span class="pr">$</span> open portfolio<span class="caret">▍</span></p>
+    </div>
+    <!-- Third visit, fifth…: just a hello. -->
+    <div class="stage v-again" aria-hidden="true">
+      <p class="hello">oh, hi <em>again.</em></p>
+      <p class="caption mono">visit no. {visits} · the bridge is still standing</p>
     </div>
     <div class="bar" aria-hidden="true"></div>
   {/key}
@@ -196,9 +216,21 @@
     width: 100%; height: 2px;
     background: var(--accent);
     transform: scaleX(0); transform-origin: left center;
-    animation: grow 1.8s linear both;
+    animation: grow var(--hold, 1.8s) linear both;
   }
   @keyframes grow { to { transform: scaleX(1); } }
+
+  .v-boot, .v-again { display: none; }
+  :global(html[data-intro-kind='boot']) .v-name, :global(html[data-intro-kind='again']) .v-name { display: none; }
+  :global(html[data-intro-kind='boot']) .v-boot { display: block; }
+  :global(html[data-intro-kind='again']) .v-again { display: block; }
+  .v-boot { text-align: left; font-size: clamp(0.875rem, 2.2vw, 1.125rem); line-height: 1.9; color: var(--ink); }
+  .v-boot p { margin: 0; opacity: 0; animation: fade 0.01s linear both; animation-delay: calc(0.1s + var(--i) * 0.3s); }
+  .v-boot .pr { color: var(--muted); } .v-boot .ok { color: var(--ok); }
+  .caret { animation: caret 0.8s steps(2) infinite; } @keyframes caret { 50% { opacity: 0; } }
+  .hello { margin: 0; font-weight: 600; font-size: clamp(2.75rem, 9vw, 6.5rem); line-height: 1; letter-spacing: -0.045em; color: var(--ink); animation: rise 0.8s var(--ease) both; }
+  .hello em { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: var(--text); }
+  .v-again .caption { animation-delay: 0.5s; }
 
   .btn {
     position: absolute; bottom: 24px; z-index: 1;

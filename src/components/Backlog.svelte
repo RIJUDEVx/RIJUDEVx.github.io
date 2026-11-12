@@ -131,7 +131,7 @@
 </div>
 <div class="pile" class:closed bind:this={box}>
   {#each TICKETS as t, i (t.id)}
-    <div class="ticket" bind:this={els[i]} style={`--d:${i * 40}ms`} role="img" aria-label={`${t.id}: ${t.label}`}
+    <div class="ticket" bind:this={els[i]} style={`--d:${i * 40}ms`} role="img" aria-label={`${t.id}: ${t.label}`} data-cursor="throw"
          onpointerdown={(e) => down(e, i)} onpointermove={move} onpointerup={up} onpointercancel={up}>
       <span class="in"><i data-tone={t.tone}></i><span class="id mono">{t.id}</span>{t.label}</span>
     </div>

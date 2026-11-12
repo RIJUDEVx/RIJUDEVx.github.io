@@ -56,7 +56,18 @@
       // No relatedTarget means the pointer has left the window.
       if (!e.relatedTarget) visible = false;
     };
-    const onDown = () => (pressed = true);
+    // Every click throws a few pixels.
+    const onDown = (e: MouseEvent) => {
+      pressed = true;
+      for (let i = 0; i < 6; i++) {
+        const sp = document.createElement('i');
+        const a = (Math.PI * 2 * i) / 6 + Math.random() * 0.8, d = 18 + Math.random() * 22;
+        sp.className = 'spark';
+        sp.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`;
+        document.body.appendChild(sp);
+        setTimeout(() => sp.remove(), 520);
+      }
+    };
     const onUp = () => (pressed = false);
 
     document.addEventListener('pointermove', onMove, { passive: true });
@@ -97,6 +108,13 @@
 {/if}
 
 <style>
+  :global(.spark) {
+    position: fixed; z-index: 99; width: 4px; height: 4px; margin: -2px 0 0 -2px; pointer-events: none; background: var(--ink);
+    animation: spark 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  }
+  :global(.spark:nth-child(3n)) { background: var(--accent); }
+  @keyframes -global-spark { to { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; } }
+
   .cursor-dot,
   .cursor-ring {
     position: fixed;

@@ -19,7 +19,7 @@ import CutLine from '../components/CutLine.svelte';
 import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
-import Pipeline from '../components/Pipeline.svelte';
+import Heist from '../components/Heist.svelte';
 import ExperienceToggle from '../components/ExperienceToggle.svelte';
 import GitHubGraph from '../components/GitHubGraph.astro';
 import StackKeys from '../components/bento/StackKeys.svelte';
@@ -47,7 +47,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
       <p class="note n-sky" aria-hidden="true">the sky follows<br />kolkata time.<br />click it to skip ahead.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
     </div>
     <div class="identity">
-      <div class="avatar"><Pixel class="portrait" /></div>
+      <div class="avatar" data-cursor="hi"><Pixel class="portrait" /></div>
       <p class="note n-me" aria-hidden="true">me, at 48 pixels.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
       <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep dt">·</span><span class="when"><Icon name="clock" /><Clock client:load variant="hero" /></span></p>
     </div>
@@ -130,11 +130,10 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   <div class="band" aria-hidden="true"></div>
 
   <section class="sec" id="pipeline" aria-labelledby="h-play">
-    <header class="head"><h2 id="h-play">try what I build</h2><span class="mono side">a toy CRM pipeline</span></header>
+    <header class="head"><h2 id="h-play">try to break in</h2><span class="mono side">a toy copy of my access model</span></header>
     <div class="body">
-      <p class="note n-play" aria-hidden="true">go on,<br />close a deal.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
-      <p class="play-lead">Drag a deal to the next stage and close it.</p>
-      <Pipeline client:visible />
+      <p class="note n-play" aria-hidden="true">go on,<br />rob the place.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
+      <Heist client:visible />
     </div>
   </section>
 
@@ -157,6 +156,34 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     <header class="head"><h2 id="h-backlog">the backlog</h2><span class="mono side">everything I'll get to "later"</span></header>
     <div class="body pile-body"><Backlog client:visible /></div>
   </section>
+
+  <!-- The yellow taxi from the banner, driving down the right rail as you scroll. Click it to go back up. -->
+  <button class="taxi" type="button" data-taxi aria-label="Back to top" data-cursor="taxi!" data-sound="toggle">
+    <svg viewBox="0 0 9 16" width="18" height="32" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="1" y="1" width="7" height="14" fill="#f5c518" /><rect x="2" y="4" width="5" height="3" fill="#1b1b1b" /><rect x="2" y="10" width="5" height="2" fill="#1b1b1b" />
+      <rect x="0" y="3" width="1" height="3" fill="#1b1b1b" /><rect x="8" y="3" width="1" height="3" fill="#1b1b1b" /><rect x="0" y="10" width="1" height="3" fill="#1b1b1b" /><rect x="8" y="10" width="1" height="3" fill="#1b1b1b" />
+      <rect x="3" y="8" width="3" height="1" fill="#1b1b1b" /><rect x="2" y="15" width="1" height="1" fill="#ff5a4e" /><rect x="6" y="15" width="1" height="1" fill="#ff5a4e" /><rect x="2" y="0" width="1" height="1" fill="#fff6c9" /><rect x="6" y="0" width="1" height="1" fill="#fff6c9" />
+    </svg>
+  </button>
+  <script>
+    const taxi = document.querySelector<HTMLElement>('[data-taxi]');
+    if (taxi) {
+      let last = scrollY, raf = 0;
+      const place = () => {
+        raf = 0;
+        const max = document.documentElement.scrollHeight - innerHeight;
+        const p = max > 0 ? Math.min(1, scrollY / max) : 0;
+        taxi.style.setProperty('--y', `${90 + p * (innerHeight - 200)}px`);
+        if (scrollY !== last) taxi.classList.toggle('up', scrollY < last); // headlights lead the way
+        taxi.classList.toggle('show', scrollY > 240);
+        last = scrollY;
+      };
+      addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(place); }, { passive: true });
+      addEventListener('resize', place);
+      taxi.addEventListener('click', () => document.querySelector<HTMLAnchorElement>('a[href="#top"]')?.click() ?? scrollTo({ top: 0, behavior: 'smooth' }));
+      place();
+    }
+  </script>
 </Base>
 
 <style>
@@ -187,6 +214,16 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .n-play { right: calc(100% + 26px); top: 96px; text-align: right; rotate: -3deg; }
     .n-play svg { margin-left: auto; scale: -1 1; }
   }
+
+  .taxi {
+    position: fixed; z-index: 30; left: calc(50% + (var(--col) + 2 * var(--gutter)) / 2 - 9px); top: 0; translate: 0 var(--y, 90px);
+    display: none; padding: 0; border: 0; background: none; cursor: pointer; line-height: 0; opacity: 0;
+    transition: opacity 0.3s, translate 0.25s linear;
+  }
+  .taxi svg { rotate: 180deg; transition: rotate 0.35s var(--ease); } /* drawn nose-up; it drives down the page */
+  .taxi:global(.up) svg { rotate: 0deg; }
+  .taxi:global(.show) { opacity: 1; }
+  @media (min-width: 900px) { .taxi { display: block; } }
 
   /* Hero: banner, portrait tile sitting on its edge, then the statement. */
   .hero { position: relative; padding: 60px 0 44px; }
@@ -244,7 +281,6 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   #ask :global(h2), #ask :global(h2 + p) { display: none; }
   #stack :global(.top .k) { letter-spacing: 0.12em; font-weight: 500; }
 
-  .play-lead { margin: -6px 0 18px; color: var(--muted); font-size: 0.875rem; }
   .contact { display: grid; gap: 4px; }
   .statement { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); max-width: 24ch; }
   .pile-body { padding-top: 18px; padding-bottom: 0; }

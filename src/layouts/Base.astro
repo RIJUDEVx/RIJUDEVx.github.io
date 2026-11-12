@@ -41,6 +41,10 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
         try { seen = sessionStorage.getItem('rd:intro'); } catch (e) {}
         if (!seen && location.pathname === '/' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
           document.documentElement.dataset.intro = 'pending';
+          // Count visits (one per session). The first gets the name intro; later ones get a shorter, different loader.
+          var n = 0;
+          try { n = (parseInt(localStorage.getItem('rd:visits') || '0', 10) || 0) + 1; localStorage.setItem('rd:visits', String(n)); } catch (e) {}
+          document.documentElement.dataset.introKind = n <= 1 ? 'name' : n % 2 === 0 ? 'boot' : 'again';
         }
       })();
       document.addEventListener('astro:after-swap', function () {
@@ -56,24 +60,28 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
       (function () {
         if (window.__rdAway) return;
         window.__rdAway = true;
-        var AWAY_TITLE = "brb? the build's still running.";
+        var AWAY = ["brb? the build's still running.", 'come back, prod is lonely.', 'psst. the tests passed.', 'still here. still compiling.', 'your tab misses you.', 'i was mid-sentence.'];
+        var BACK = "oh, you're back.";
         var AWAY_ICON = '/favicon-away.svg';
         var home = { title: document.title, icon: '/favicon.svg' };
+        var turn = 0, wasAway = false, backTimer = 0;
         function iconEl() { return document.querySelector('link[rel="icon"][type="image/svg+xml"]'); }
         function remember() {
-          if (document.title !== AWAY_TITLE) home.title = document.title;
+          if (AWAY.indexOf(document.title) < 0 && document.title !== BACK) home.title = document.title;
           var el = iconEl();
           if (el && el.getAttribute('href') !== AWAY_ICON) home.icon = el.getAttribute('href');
         }
         var blurred = false;
         function apply() {
           var el = iconEl();
+          clearTimeout(backTimer);
           if (document.hidden || blurred) {
-            document.title = AWAY_TITLE;
+            if (!wasAway) { wasAway = true; document.title = AWAY[turn++ % AWAY.length]; } // a different line each time
             if (el) el.setAttribute('href', AWAY_ICON);
           } else {
-            document.title = home.title;
             if (el) el.setAttribute('href', home.icon);
+            if (wasAway) { wasAway = false; document.title = BACK; backTimer = setTimeout(function () { document.title = home.title; }, 1600); }
+            else document.title = home.title;
           }
         }
         document.addEventListener('visibilitychange', function () { remember(); apply(); });
@@ -106,6 +114,30 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
         const el = (e.target as HTMLElement).closest<HTMLElement>('[data-sound]');
         if (el?.dataset.sound) play(el.dataset.sound as SoundName);
       });
+      // A very quiet tick when the mouse arrives on something you can press.
+      let lastHover: Element | null = null;
+      document.addEventListener('pointerover', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const el = (e.target as Element).closest?.('a, button, [data-sound]') ?? null;
+        if (el && el !== lastHover) play('hover');
+        lastHover = el;
+      }, { passive: true });
+
+      // Copying text gets a small toast.
+      const QUIPS = ['copied. quote me on that :)', 'copied. cite your sources.', 'copied. good taste.'];
+      let quip = 0;
+      document.addEventListener('copy', () => {
+        if (!String(getSelection() ?? '').trim()) return;
+        document.querySelector('.toast')?.remove();
+        const t = document.createElement('div');
+        t.className = 'toast mono'; t.setAttribute('role', 'status'); t.textContent = QUIPS[quip++ % QUIPS.length];
+        document.body.appendChild(t);
+        setTimeout(() => t.classList.add('out'), 1800); setTimeout(() => t.remove(), 2200);
+      });
+
+      // For whoever opens the console.
+      console.log('%c rd %c hi, fellow inspector.', 'background:#faf9f5;color:#141413;font:600 14px Georgia,serif;padding:2px 6px;border-radius:4px', 'font:13px ui-monospace,monospace');
+      console.log('%cthe source is tidy, I promise. press D on the page to deploy, ⌘K to jump around.\nsay hi: rijudev12@gmail.com', 'font:12px ui-monospace,monospace;color:#87867f');
     </script>
   </body>
 </html>
