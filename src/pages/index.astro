@@ -15,7 +15,6 @@ import Intro from '../components/Intro.svelte';
 import Pixel from '../components/Pixel.astro';
 import Skyline from '../components/Skyline.astro';
 import Backlog from '../components/Backlog.svelte';
-import CutLine from '../components/CutLine.svelte';
 import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
@@ -37,17 +36,9 @@ const P = Object.fromEntries(work.map((w) => [w.id, {
   summary: w.data.summary, stats: w.data.stats,
 }]));
 const hash = (id: string) => { let h = 2166136261; for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0).toString(16).padStart(8, '0').slice(0, 7); };
-// Dates from profile/career-facts.md.
-const path = [
-  { when: 'Jan 2022', what: 'Joined as an intern.', detail: 'Switch to Classic and Remote Tooling.' },
-  { when: 'Oct 2022', what: 'Native iOS.', detail: 'Attenta Yoga, then top contributor on AttentaFit.' },
-  { when: 'Aug 2024', what: 'Started Selegic CRM, alone.', detail: 'Empty repo to v1.0.0 by Jan 2025.' },
-  { when: 'Apr 2025', what: 'Selegic Internal.', detail: "The company's time-tracking platform." },
-  { when: 'Mar 2026', what: 'Extension platform.', detail: 'A public SDK and CLI for outside developers.' },
-  { when: 'Now', what: 'Leading the CRM team.', detail: '236 changes shipped since Jul 2026.' },
-];
 // Git decoration for the projects log: refs beside the title, and which commits sit on a side branch.
-const refs: Record<string, string> = { 'selegic-crm': 'HEAD → main', 'selegic-internal': 'tag: v1.5.0', migrata: 'tag: appexchange' };
+// Latest release tag of each project, read from its repository on 12 Nov 2026. Migrata and Remote Tooling have no tags.
+const tags: Record<string, string> = { 'selegic-crm': 'crm-v1.0.0-alpha.6', 'selegic-internal': 'v1.6.0', 'doc-gen': 'v1.0.0-beta.9', 'switch-to-classic': 'v1.4', 'attenta-ios': '1.0.6.9' };
 const sideBranch = new Set(['selegic-internal', 'doc-gen', 'attenta-ios']);
 const social = links.filter((l) => l.brand);
 const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
@@ -70,7 +61,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
       <span class="ln">Salesforce tooling and native apps,</span>{' '}
       <em class="ln">and lead the team behind Selegic CRM.</em>
     </h1>
-    <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · 4+ years · {work.length} projects</p>
+    <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · ~5 years · {work.length} projects</p>
     <div class="cta">
       <CopyEmail client:load email={profile.email} big />
       <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
@@ -81,33 +72,11 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   <div class="band" aria-hidden="true"></div>
 
   <section class="sec" aria-labelledby="h-about">
-    <header class="head"><h2 id="h-about">about</h2><span class="mono side">ten seconds, or two minutes</span></header>
+    <header class="head"><h2 id="h-about">about</h2><span class="mono side">hover the underlined bits</span></header>
     <div class="body about">
       <div class="story">
         <p class="tagline">{profile.tagline}</p>
         <p class="lede">I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
-      </div>
-      <dl class="facts mono">
-        <div><dt>based in</dt><dd>{profile.city}</dd></div>
-        <div><dt>working at</dt><dd><a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a>, since Jan 2022</dd></div>
-        <div><dt>mostly</dt><dd>backend, platforms, leading a team</dd></div>
-        <div><dt>open to</dt><dd>{profile.workModes}</dd></div>
-      </dl>
-      <div class="more">
-        <CutLine client:visible label="Cut along the line to see how I got here" hint="✂ drag to cut · or click · how I got here, year by year">
-          <div class="prose" id="about">
-            <ol class="path">
-              {path.map((m) => (
-                <li class:list={{ now: m.when === 'Now' }}>
-                  <span class="when mono">{m.when}</span>
-                  <b>{m.what}</b>
-                  <span class="detail">{m.detail}</span>
-                </li>
-              ))}
-            </ol>
-            <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
-          </div>
-        </CutLine>
       </div>
     </div>
   </section>
@@ -119,30 +88,33 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     <div class="body projects">
       <div class="log">
         {work.map((w, i) => (
-          <details class:list={['commit', { branch: sideBranch.has(w.id) }]} name="proj" open={i === 0}>
-            <summary data-sound="tap" data-cursor="diff" data-img={`/og/work/${w.id}.png`}>
+          <div class:list={['commit', { branch: sideBranch.has(w.id), open: i === 0 }]}>
+            <button type="button" class="row" aria-expanded={i === 0 ? 'true' : 'false'} aria-controls={`diff-${w.id}`} data-sound="tap" data-cursor="diff">
               <span class="node" data-tone={statusLabel[w.data.status].tone} aria-hidden="true"></span>
               <span class="hash mono">{hash(w.id)}</span>
               <span class="ttl">{w.data.title}</span>
-              {refs[w.id] && <span class:list={['ref', 'mono', { tag: refs[w.id].startsWith('tag') }]}>{refs[w.id]}</span>}
+              {i === 0 && <span class="ref mono">HEAD → main</span>}
+              {tags[w.id] && <span class="ref tag mono">tag: {tags[w.id]}</span>}
               <span class="badge" data-tone={statusLabel[w.data.status].tone} title={statusLabel[w.data.status].text}>{statusLabel[w.data.status].short ?? statusLabel[w.data.status].text}</span>
               <span class="when mono">{w.data.area}{/\d{4}/.test(w.data.years) && ` · ${year(w.data.years)}`}</span>
-            </summary>
-            <div class="diff">
-              <p class="meta mono"><span>commit {hash(w.id)}</span><span>role: {w.data.role}</span>{/\d{4}/.test(w.data.years) && <span>date: {w.data.years}</span>}</p>
-              <p class="cs">{w.data.summary}</p>
-              {w.data.stats.length > 0 && (
-                <ul class="plus mono">{w.data.stats.slice(0, 3).map((s) => <li><b>+ {s.value}</b> {s.label}</li>)}</ul>
-              )}
-              <div class="card-foot">
-                <ul class="tags">{w.data.stack.slice(0, 6).map((t) => <li class="mono">{t}</li>)}</ul>
-                <a class="go mono" href={`/work/${w.id}`} data-sound="tap" data-cursor="open">read the case study ↗</a>
+              <span class="chev" aria-hidden="true"></span>
+            </button>
+            <div class="fold" id={`diff-${w.id}`} inert={i !== 0}>
+              <div class="diff">
+                <p class="meta mono"><span>commit {hash(w.id)}</span><span>role: {w.data.role}</span>{/\d{4}/.test(w.data.years) && <span>date: {w.data.years}</span>}</p>
+                <p class="cs">{w.data.summary}</p>
+                {w.data.stats.length > 0 && (
+                  <ul class="plus mono">{w.data.stats.slice(0, 3).map((s) => <li><b>+ {s.value}</b> {s.label}</li>)}</ul>
+                )}
+                <div class="card-foot">
+                  <ul class="tags">{w.data.stack.slice(0, 6).map((t) => <li class="mono">{t}</li>)}</ul>
+                  <a class="go mono" href={`/work/${w.id}`} data-sound="tap" data-cursor="open">read the case study ↗</a>
+                </div>
               </div>
             </div>
-          </details>
+          </div>
         ))}
         <p class="keys mono" aria-hidden="true"><kbd>j</kbd><kbd>k</kbd> move · <kbd>enter</kbd> open</p>
-        <img class="logpeek" data-logpeek alt="" width="320" height="168" decoding="async" />
         <p class="root mono" aria-hidden="true"><span class="node first"></span>jan 2022 · initial commit: joined Selegic as an intern</p>
       </div>
     </div>
@@ -240,38 +212,42 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     }
   </script>
   <script>
-    // Projects log: j / k move between commits while the pointer or focus is in the log,
-    // and a preview card trails the cursor over each row.
+    // Projects log: one commit open at a time. Opening one closes the other with the same
+    // animation, and the page scrolls by exactly as much as the content above moved, so the
+    // row you clicked stays under your cursor. j / k move between rows.
     const log = document.querySelector<HTMLElement>('.log');
-    const peek = document.querySelector<HTMLImageElement>('[data-logpeek]');
     if (log) {
-      const rows = [...log.querySelectorAll<HTMLElement>('summary')];
+      const rows = [...log.querySelectorAll<HTMLButtonElement>('.row')];
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const set = (row: HTMLButtonElement, open: boolean) => {
+        row.setAttribute('aria-expanded', String(open));
+        row.parentElement!.classList.toggle('open', open);
+        (row.nextElementSibling as HTMLElement).inert = !open;
+      };
+      for (const row of rows) row.addEventListener('click', () => {
+        const opening = row.getAttribute('aria-expanded') !== 'true';
+        const top = row.getBoundingClientRect().top;
+        for (const r of rows) if (r !== row) set(r, false);
+        set(row, opening);
+        // Hold the clicked row where it is while the heights animate.
+        const until = performance.now() + (still ? 50 : 420);
+        const pin = () => {
+          const drift = row.getBoundingClientRect().top - top;
+          if (Math.abs(drift) > 0.5) scrollBy({ top: drift, behavior: 'instant' });
+          if (performance.now() < until) requestAnimationFrame(pin);
+        };
+        requestAnimationFrame(pin);
+      });
       let inside = false;
       log.addEventListener('pointerenter', () => (inside = true));
-      log.addEventListener('pointerleave', () => { inside = false; peek?.classList.remove('on'); });
+      log.addEventListener('pointerleave', () => (inside = false));
       document.addEventListener('keydown', (e) => {
-        const at = rows.indexOf(document.activeElement as HTMLElement);
+        const at = rows.indexOf(document.activeElement as HTMLButtonElement);
         if ((!inside && at < 0) || e.metaKey || e.ctrlKey || e.altKey || (e.key !== 'j' && e.key !== 'k')) return;
         e.preventDefault();
-        const open = rows.findIndex((r) => (r.parentElement as HTMLDetailsElement).open);
-        const from = at >= 0 ? at : Math.max(0, open);
-        rows[Math.max(0, Math.min(rows.length - 1, from + (e.key === 'j' ? 1 : -1)))].focus();
+        const from = at >= 0 ? at : Math.max(0, rows.findIndex((r) => r.getAttribute('aria-expanded') === 'true'));
+        rows[Math.max(0, Math.min(rows.length - 1, from + (e.key === 'j' ? 1 : -1)))].focus({ preventScroll: false });
       });
-      if (peek && matchMedia('(pointer: fine)').matches) {
-        let x = 0, y = 0, px = 0, py = 0, raf = 0;
-        const loop = () => { px += (x - px) * 0.16; py += (y - py) * 0.16; peek.style.transform = `translate3d(${px + 24}px, ${py - 84}px, 0) rotate(${Math.max(-6, Math.min(6, (x - px) * 0.08))}deg)`; raf = peek.classList.contains('on') ? requestAnimationFrame(loop) : 0; };
-        for (const r of rows) {
-          r.addEventListener('pointerenter', (e) => {
-            if ((r.parentElement as HTMLDetailsElement).open) return;
-            if (peek.getAttribute('src') !== r.dataset.img) peek.src = r.dataset.img!;
-            if (!peek.classList.contains('on')) { px = x = e.clientX; py = y = e.clientY; }
-            peek.classList.add('on'); if (!raf) raf = requestAnimationFrame(loop);
-          });
-          r.addEventListener('pointermove', (e) => { x = e.clientX; y = e.clientY; });
-          r.addEventListener('pointerleave', () => peek.classList.remove('on'));
-          r.addEventListener('click', () => peek.classList.remove('on'));
-        }
-      }
     }
   </script>
 </Base>
@@ -350,24 +326,9 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
   .icon:hover { color: var(--ink); border-color: var(--rule-strong); }
 
-  /* About: the one-liner, the paragraph, a fact sheet beside them, and a longer story behind the cut line. */
-  .about { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 36px 56px; align-items: start; }
-  .tagline { margin: 0 0 18px; font-size: 1.625rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1.2; color: var(--ink); text-wrap: balance; }
-  .lede { margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--text); }
-  .facts { margin: 4px 0 0; display: grid; gap: 14px; padding-left: 22px; border-left: 1px dotted var(--rule-strong); }
-  .facts dt { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-  .facts dd { margin: 2px 0 0; font-size: 0.8125rem; line-height: 1.5; color: var(--ink); }
-  .facts a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
-  .more { grid-column: 1 / -1; }
-  /* Behind the cut: the path so far, six stops joined by a dotted line. */
-  .path { list-style: none; margin: 6px 0 30px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 0; }
-  .path li { position: relative; display: grid; gap: 3px; padding: 20px 20px 0 0; border-top: 1px dotted var(--rule-strong); }
-  .path li::before { content: ''; position: absolute; left: 0; top: -5px; width: 9px; height: 9px; border-radius: 50%; background: var(--paper); border: 2px solid var(--muted); }
-  .path .now::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent); }
-  .path .when { display: block; font-size: 0.6875rem; color: var(--muted); } .path .now .when { color: var(--accent); }
-  .path b { font-size: 0.9375rem; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
-  .path .detail { font-size: 0.8125rem; line-height: 1.5; color: var(--text); }
-  .prose p { color: var(--text); font-size: 1rem; line-height: 1.7; margin: 0 0 14px; max-width: 68ch; }
+  /* About: the one-liner, then the paragraph with its project peeks. */
+  .tagline { margin: 0 0 20px; max-width: 24ch; font-size: 2rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); }
+  .lede { margin: 0; max-width: 62ch; font-size: 1.125rem; line-height: 1.75; color: var(--text); }
 
   .card-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
   .tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
@@ -387,21 +348,27 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .log { position: relative; padding-left: 46px; }
   .log::before { content: ''; position: absolute; left: 6.5px; top: 14px; bottom: 12px; width: 1px; background: var(--rule-strong); }
   .commit { position: relative; border-bottom: 1px solid var(--rule); }
-  .commit summary { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 13px 0; cursor: pointer; list-style: none; }
-  .commit summary::-webkit-details-marker { display: none; }
+  .row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; width: 100%; padding: 14px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  /* The diff folds with a grid row going from 0fr to 1fr, so opening and closing both animate. */
+  .fold { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s var(--ease); }
+  .commit.open .fold { grid-template-rows: 1fr; }
+  .fold > .diff { min-height: 0; overflow: hidden; opacity: 0; transition: opacity 0.25s; }
+  .commit.open .fold > .diff { opacity: 1; transition-delay: 0.08s; }
+  .chev { flex: none; width: 7px; height: 7px; margin: 0 4px 3px 2px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); rotate: 45deg; transition: rotate 0.3s var(--ease), margin 0.3s var(--ease); }
+  .commit.open .chev { rotate: 225deg; margin-bottom: -3px; }
   .node { position: absolute; left: -46px; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); border: 2px solid var(--muted); transition: scale 0.25s var(--ease), background 0.2s; }
   .commit .node { top: 17px; }
   .node[data-tone='ok'] { border-color: var(--ok); } .node[data-tone='pilot'] { border-color: var(--accent); }
-  .commit[open] .node, .commit summary:hover .node { scale: 1.25; }
-  .commit[open] .node[data-tone='ok'] { background: var(--ok); } .commit[open] .node[data-tone='pilot'] { background: var(--accent); } .commit[open] .node[data-tone='past'] { background: var(--muted); }
+  .commit.open .node, .row:hover .node { scale: 1.25; }
+  .commit.open .node[data-tone='ok'] { background: var(--ok); } .commit.open .node[data-tone='pilot'] { background: var(--accent); } .commit.open .node[data-tone='past'] { background: var(--muted); }
   .hash { font-size: 0.6875rem; color: var(--warn); }
   .ttl { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); transition: translate 0.25s var(--ease); }
-  .commit summary:hover .ttl { translate: 3px 0; }
+  .row:hover .ttl { translate: 3px 0; }
   .ref { font-size: 0.625rem; padding: 1px 7px; border-radius: 5px; color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); }
   .commit .badge { font-size: 0.625rem; white-space: nowrap; }
   .commit .when { margin-left: auto; font-size: 0.6875rem; color: var(--muted); }
-  .diff { display: grid; gap: 12px; padding: 2px 0 20px; animation: unfold 0.3s var(--ease); }
-  @keyframes unfold { from { opacity: 0; translate: 0 -6px; } }
+  .diff { display: grid; gap: 12px; }
+  .diff > :first-child { margin-top: 2px; } .diff > :last-child { margin-bottom: 22px; }
   .diff .cs { margin: 0; max-width: 60ch; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
   .plus { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; display: grid; gap: 2px; font-size: 0.75rem; color: var(--text); background: color-mix(in oklab, var(--ok) 7%, transparent); border-left: 2px solid var(--ok); }
   .plus b { color: var(--ok); font-weight: 500; margin-right: 6px; }
@@ -416,10 +383,8 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .meta { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 18px; font-size: 0.6875rem; color: var(--muted); }
   .keys { position: absolute; right: 0; top: -38px; margin: 0; font-size: 0.6875rem; color: var(--muted); }
   .keys kbd { font-family: inherit; font-size: 0.625rem; border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; margin-right: 3px; }
-  .commit summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-  .logpeek { position: fixed; left: 0; top: 0; z-index: 40; width: 320px; height: auto; border-radius: 12px; pointer-events: none; opacity: 0; scale: 0.9; box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.65), 0 0 0 1px var(--rule-strong); transition: opacity 0.2s, scale 0.3s var(--ease); }
-  .logpeek:global(.on) { opacity: 1; scale: 1; }
-  @media (hover: none) { .keys, .logpeek { display: none; } }
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  @media (hover: none) { .keys { display: none; } }
 
   #ask :global(h2), #ask :global(h2 + p) { display: none; }
   #stack :global(.top .k) { letter-spacing: 0.12em; font-weight: 500; }
@@ -447,11 +412,9 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .side { display: none; }
     .commit .when { margin-left: 0; flex-basis: 100%; }
     .body { padding: 26px var(--gutter) 52px; }
-    .about { grid-template-columns: 1fr; gap: 26px; }
-    .path { grid-template-columns: 1fr 1fr; }
     .log { padding-left: 40px; } .node { left: -40px; } .commit.branch::before { left: -33.5px; } .commit.branch .node { left: -22px; } .root .node { left: -38px; }
-    .tagline { font-size: 1.375rem; }
-    .facts { grid-template-columns: 1fr 1fr; padding: 18px 0 0; border-left: 0; border-top: 1px dotted var(--rule-strong); }
+    .tagline { font-size: 1.5rem; }
+    .lede { font-size: 1.0625rem; }
     .band { height: 22px; }
 
     .card-foot { flex-direction: column; align-items: flex-start; }

@@ -3,6 +3,7 @@
   import { fade, scale } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { play, isMuted, setMuted } from '../lib/sound';
+  import { toast, copiedLine } from '../lib/toast';
   import { profile, links } from '../data/site';
 
   type Group = 'Go to' | 'Case studies' | 'Actions' | 'Elsewhere';
@@ -52,6 +53,7 @@
       await navigator.clipboard.writeText(profile.email);
       copied = true;
       play('copy');
+      toast(copiedLine(profile.email));
     } catch {}
   }
 

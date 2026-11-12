@@ -7,7 +7,7 @@
     role: string;
     dates: string;
     tldr: string;
-    long: string[];
+    long: { when: string; text: string }[];
   } = $props();
 
   type Tab = 'tldr' | 'long';
@@ -91,8 +91,8 @@
         <p class="tldr">{tldr}</p>
       {:else}
         <ul class="long">
-          {#each long as item (item)}
-            <li>{item}</li>
+          {#each long as item (item.when)}
+            <li class:now={item.when === 'Now'}><span class="yr mono">{item.when}</span><span>{item.text}</span></li>
           {/each}
         </ul>
       {/if}
@@ -128,11 +128,18 @@
   .panel { overflow: hidden; transition: height 0.3s var(--ease); margin-top: 14px; }
   .tldr { margin: 0; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
   .long { list-style: none; margin: 0; padding: 0; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
-  .long li { position: relative; padding-left: 1.25em; }
-  .long li + li { margin-top: 8px; }
-  .long li::before { content: '–'; position: absolute; left: 0; color: var(--muted); }
-
-  @media (max-width: 640px) {
-    .seg { margin-left: 0; }
+  /* The long version: years down the left, a line and a dot for each stop. */
+  .long li { position: relative; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 0 28px; padding: 0 0 22px; }
+  .long li:last-child { padding-bottom: 0; }
+  .long li::before { content: ''; position: absolute; left: 108px; top: 8px; width: 9px; height: 9px; margin-left: -4px; border-radius: 50%; background: var(--paper); border: 2px solid var(--muted); z-index: 1; }
+  .long li::after { content: ''; position: absolute; left: 108px; top: 12px; bottom: -12px; width: 1px; background: var(--rule-strong); }
+  .long li:last-child::after { display: none; }
+  .long li.now::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent); }
+  .yr { font-size: 0.6875rem; color: var(--muted); text-align: right; padding-top: 4px; white-space: nowrap; }
+  .now .yr { color: var(--accent); }
+  @media (max-width: 760px) {
+    .long li { grid-template-columns: 1fr; padding-left: 22px; gap: 2px; }
+    .long li::before, .long li::after { left: 4px; }
+    .yr { text-align: left; padding-top: 0; }
   }
 </style>

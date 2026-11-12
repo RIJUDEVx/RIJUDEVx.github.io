@@ -29,7 +29,7 @@ export function homeMarkdown(origin: string, work: Work[]): string {
   add('## Experience');
   add(`### ${experience.role}, ${experience.company} (${experience.dates})`);
   add(experience.tldr);
-  add(...experience.long.map((l) => `- ${l}`));
+  add(...experience.long.map((l) => `- **${l.when}:** ${l.text}`));
 
   add('## Projects');
   for (const w of sortWork(work)) {

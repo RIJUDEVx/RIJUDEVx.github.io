@@ -9,7 +9,7 @@ years: "Apr 2025 – Aug 2026"
 live: "https://internal.selegic.com"
 stack: ["Better Auth", "React Email", "AWS SES", "Prisma", "PostgreSQL", "Docker"]
 stats:
-  - value: "v1.5.0"
+  - value: "v1.6.0"
     label: "shipped"
   - value: "3"
     label: "role tiers"
@@ -35,4 +35,4 @@ Reports are generated from React Email templates and delivered through AWS SES.
 
 ## What changed
 
-It shipped to v1.5.0. Later it was merged into `selegic-core`, the core platform that Selegic CRM runs on.
+It shipped to v1.6.0. Later it was merged into `selegic-core`, the core platform that Selegic CRM runs on.

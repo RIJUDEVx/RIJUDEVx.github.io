@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { toast, copiedLine } from '../../lib/toast';
   // Desktop nav: a "dynamic island". Collapsed, it says where you are and rotates
   // a little live info. It leans toward the cursor and a soft light follows the
   // pointer across it. Hover, focus or click and it morphs open into the menu.
@@ -78,7 +79,7 @@
   }
 
   async function copyEmail() {
-    try { await navigator.clipboard.writeText(profile.email); copied = true; play('copy'); setTimeout(() => (copied = false), 1600); }
+    try { await navigator.clipboard.writeText(profile.email); copied = true; play('copy'); toast(copiedLine(profile.email)); setTimeout(() => (copied = false), 1600); }
     catch { location.href = `mailto:${profile.email}`; }
   }
 

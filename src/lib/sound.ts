@@ -28,21 +28,37 @@ if (typeof window !== 'undefined') {
 }
 
 function audio(): AudioContext | null {
-  if (typeof window === 'undefined' || !unlocked) return null;
+  if (typeof window === 'undefined') return null;
+  if (!unlocked && !(navigator as any).userActivation?.hasBeenActive) return null;
   if (!ctx) {
     const AC = window.AudioContext || (window as any).webkitAudioContext;
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.22;
+    master.gain.value = 0.3;
     master.connect(ctx.destination);
   }
-  if (ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
 
-function tone(freq: number, start: number, dur: number, opts: { type?: OscillatorType; gain?: number; to?: number } = {}) {
+// Run `fn` once the context is really running (resume is asynchronous, and notes
+// scheduled before it finishes are lost). Afterwards, if no music is playing, put
+// the context back to sleep so the tab does not show "playing audio" in silence.
+let sleepTimer = 0;
+function withAudio(fn: (c: AudioContext) => void) {
   const c = audio();
+  if (!c) return;
+  clearTimeout(sleepTimer);
+  const run = () => {
+    fn(c);
+    sleepTimer = window.setTimeout(() => { if (!playing && c.state === 'running') c.suspend(); }, 2500);
+  };
+  if (c.state === 'running') run();
+  else c.resume().then(run).catch(() => {});
+}
+
+function tone(freq: number, start: number, dur: number, opts: { type?: OscillatorType; gain?: number; to?: number } = {}) {
+  const c = ctx;
   if (!c || !master) return;
   const t = c.currentTime + start;
   const osc = c.createOscillator();
@@ -67,14 +83,14 @@ const kit: Record<SoundName, () => void> = {
   pick: () => tone(300, 0, 0.05, { type: 'triangle', gain: 0.4 }),
   drop: () => tone(180, 0, 0.09, { type: 'triangle', to: 120, gain: 0.5 }),
   win: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.07, 0.25, { gain: 0.35 })),
-  hover: () => tone(2300, 0, 0.02, { gain: 0.05 }),
+  hover: () => tone(2300, 0, 0.025, { gain: 0.09 }),
   deny: () => { tone(233, 0, 0.11, { type: 'square', gain: 0.13 }); tone(174, 0.1, 0.2, { type: 'square', gain: 0.13 }); },
   intro: () => { tone(196, 0, 0.9, { gain: 0.25 }); tone(294, 0.12, 0.9, { gain: 0.2 }); tone(392, 0.24, 1.1, { gain: 0.18 }); },
 };
 
 export function play(name: SoundName) {
   if (isMuted()) return;
-  try { kit[name]?.(); } catch {}
+  try { withAudio(() => kit[name]?.()); } catch {}
 }
 
 // ───────── Music: a small generative chiptune loop, also synthesised (no audio file).
@@ -111,16 +127,19 @@ export function musicPlaying() { return playing; }
 export function setMusic(on: boolean) {
   try { sessionStorage.setItem(MUSIC_KEY, on ? 'on' : 'off'); } catch {}
   if (on === playing) return;
-  const c = audio();
-  if (!c) return;
   if (on) {
-    if (!bus) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; bus = c.createGain(); bus.connect(lp).connect(c.destination); }
-    bus.gain.cancelScheduledValues(c.currentTime); bus.gain.setValueAtTime(0.0001, c.currentTime); bus.gain.exponentialRampToValueAtTime(0.5, c.currentTime + 0.4);
-    stepNo = 0; nextAt = c.currentTime + 0.08; playing = true;
-    schedule(); timer = window.setInterval(schedule, 100);
+    playing = true; // set first, so the idle timer never puts the context to sleep under the music
+    withAudio((c) => {
+      if (!playing) return;
+      if (!bus) { const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400; bus = c.createGain(); bus.connect(lp).connect(c.destination); }
+      bus.gain.cancelScheduledValues(c.currentTime); bus.gain.setValueAtTime(0.0001, c.currentTime); bus.gain.exponentialRampToValueAtTime(0.5, c.currentTime + 0.4);
+      stepNo = 0; nextAt = c.currentTime + 0.08;
+      schedule(); clearInterval(timer); timer = window.setInterval(schedule, 100);
+    });
   } else {
     playing = false; clearInterval(timer);
-    bus?.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.25);
+    if (ctx && bus) bus.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+    withAudio(() => {}); // restarts the idle timer, which now lets the context sleep
   }
   window.dispatchEvent(new CustomEvent('music:change', { detail: { playing } }));
 }

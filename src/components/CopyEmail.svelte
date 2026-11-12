@@ -1,5 +1,6 @@
 <script lang="ts">
   import { play } from '../lib/sound';
+  import { toast, copiedLine } from '../lib/toast';
 
   let { email, big = false }: { email: string; big?: boolean } = $props();
 
@@ -40,6 +41,7 @@
       return;
     }
     play('copy');
+    toast(copiedLine(email));
     copied = true;
     clearTimeout(timer);
     timer = setTimeout(() => (copied = false), 1600);
@@ -52,7 +54,6 @@
   <button type="button" class="copy" class:pill={big} data-cursor="copy" title="Copy email" onclick={onCopy}>
     {email}
   </button>
-  <span class="copied mono" aria-live="polite">{copied ? 'copied ✓' : ''}</span>
 </span>
 
 <style>

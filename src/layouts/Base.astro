@@ -109,6 +109,7 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
     <CommandPalette client:idle />
     <script>
       import { play, type SoundName } from '../lib/sound';
+      import { toast, copiedLine } from '../lib/toast';
       // Any element with data-sound="name" plays that sound when clicked.
       document.addEventListener('click', (e) => {
         const el = (e.target as HTMLElement).closest<HTMLElement>('[data-sound]');
@@ -123,16 +124,10 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
         lastHover = el;
       }, { passive: true });
 
-      // Copying text gets a small toast.
-      const QUIPS = ['copied. quote me on that :)', 'copied. cite your sources.', 'copied. good taste.'];
-      let quip = 0;
+      // Copying selected text gets the same toast as the copy buttons, worded for what was copied.
       document.addEventListener('copy', () => {
-        if (!String(getSelection() ?? '').trim()) return;
-        document.querySelector('.toast')?.remove();
-        const t = document.createElement('div');
-        t.className = 'toast mono'; t.setAttribute('role', 'status'); t.textContent = QUIPS[quip++ % QUIPS.length];
-        document.body.appendChild(t);
-        setTimeout(() => t.classList.add('out'), 1800); setTimeout(() => t.remove(), 2200);
+        const text = String(getSelection() ?? '');
+        if (text.trim()) toast(copiedLine(text));
       });
 
       // For whoever opens the console.

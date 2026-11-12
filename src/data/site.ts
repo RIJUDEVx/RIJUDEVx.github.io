@@ -91,13 +91,16 @@ export const experience = {
   role: 'Senior Software Engineer',
   dates: 'Jan 2022 – Present',
   tldr: 'Lead the engineering team behind Selegic CRM, a platform I designed and took to its first release on my own in five months. Also built Migrata, now on Salesforce AppExchange, and the company’s time-tracking platform.',
+  // The long version walks the whole five years, oldest first. Facts and dates from profile/career-facts.md.
   long: [
-    'Lead the Selegic CRM team: set architecture and priorities, break work into deliverables, review code and mentor engineers.',
-    'Set up how the team ships: one shared codebase, a preview of every change, automated tests that gate each release, and staged rollouts. 236 changes shipped this way since Jul 2026.',
-    'Made new customer workspaces ready about 3× faster with a pool of pre-warmed tenant schemas.',
-    'Opened the CRM to outside developers with a public extension SDK and CLI.',
-    'Gave every engineer an isolated environment per branch, with its own ports and database, so the team works in parallel without clashes.',
-    'Before the CRM: native iOS apps (top contributor on AttentaFit) and Salesforce tools in Angular and Node.js.',
+    { when: '2022', text: 'Joined as an intern. Built Switch to Classic, a Chrome extension for Salesforce that I then maintained for three years, and Remote Tooling: Angular front ends and Node.js services for field-level security and permission sets.' },
+    { when: '2022 – 2023', text: 'Moved to native iOS. Calendar, booking and players on Attenta Yoga, then the top contributor on AttentaFit: onboarding, workouts, diet plans, subscriptions, HealthKit and a custom video player.' },
+    { when: '2023 – 2024', text: 'Salesforce development in Apex and LWC, with GitHub Actions deploying to orgs.' },
+    { when: 'Alongside', text: 'Built Migrata, an automated multi-org Salesforce data migration pipeline in Node.js that replaced manual CPQ deployments. It is on AppExchange.' },
+    { when: '2024 – 2025', text: 'Started Selegic CRM alone from an empty repository and shipped 1.0.0 in five months. Then rebuilt it as one TypeScript codebase on Cloudflare Workers and PostgreSQL.' },
+    { when: '2025 – 2026', text: 'Built Selegic Internal end to end: the time-tracking and project platform the company uses every day, with sign-in, three role tiers and emailed reports.' },
+    { when: '2026', text: 'Opened the CRM to outside developers with a public extension SDK and CLI.' },
+    { when: 'Now', text: 'Lead the Selegic CRM team: set architecture and priorities, review code and mentor engineers. Set up how the team ships: a preview of every change, tests that gate each release, staged rollouts. 236 changes shipped this way since Jul 2026. New customer workspaces are ready about 3× faster, from a pool of pre-warmed tenant schemas.' },
   ],
 };
 
