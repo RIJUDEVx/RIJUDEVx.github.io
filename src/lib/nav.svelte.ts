@@ -6,7 +6,7 @@ import { Spring } from 'svelte/motion';
 import { profile } from '../data/site';
 
 export const navItems = [
-  { id: 'work', label: 'Work', href: '/#work' },
+  { id: 'work', label: 'Projects', href: '/#work' },
   { id: 'glance', label: 'Experience', href: '/#experience' },
   { id: 'pipeline', label: 'Playground', href: '/#pipeline' },
   { id: 'contact', label: 'Contact', href: '/#contact' },

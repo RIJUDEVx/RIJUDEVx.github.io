@@ -94,7 +94,7 @@
 
   const commands = $derived.by<Cmd[]>(() => [
     route('home', 'Go to', 'Home', '/'),
-    route('work', 'Go to', 'Work', '/#work'),
+    route('work', 'Go to', 'Projects', '/#work'),
     route('experience', 'Go to', 'Experience', '/#experience'),
     route('about', 'Go to', 'About', '/#about'),
     route('pipeline', 'Go to', 'Try the pipeline', '/#pipeline'),

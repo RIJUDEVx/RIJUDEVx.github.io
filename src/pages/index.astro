@@ -20,6 +20,7 @@ import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
 import Questions from '../components/Questions.svelte';
 import Heist from '../components/Heist.svelte';
+import OnCall from '../components/OnCall.svelte';
 import ExperienceToggle from '../components/ExperienceToggle.svelte';
 import GitHubGraph from '../components/GitHubGraph.astro';
 import StackKeys from '../components/bento/StackKeys.svelte';
@@ -35,6 +36,7 @@ const P = Object.fromEntries(work.map((w) => [w.id, {
   status: statusLabel[w.data.status].text, tone: statusLabel[w.data.status].tone,
   summary: w.data.summary, stats: w.data.stats,
 }]));
+const hash = (id: string) => { let h = 2166136261; for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0).toString(16).padStart(8, '0').slice(0, 7); };
 const social = links.filter((l) => l.brand);
 const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
 ---
@@ -47,7 +49,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
       <p class="note n-sky" aria-hidden="true">the sky follows<br />kolkata time.<br />click it to skip ahead.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
     </div>
     <div class="identity">
-      <div class="avatar" data-cursor="hi"><Pixel class="portrait" /></div>
+      <button class="avatar" type="button" data-avatar data-cursor="change me" data-sound="toggle" aria-label="Change the portrait colours"><Pixel class="portrait" /></button>
       <p class="note n-me" aria-hidden="true">me, at 48 pixels.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
       <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep dt">·</span><span class="when"><Icon name="clock" /><Clock client:load variant="hero" /></span></p>
     </div>
@@ -67,45 +69,59 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   <div class="band" aria-hidden="true"></div>
 
   <section class="sec" aria-labelledby="h-about">
-    <header class="head"><h2 id="h-about">about</h2><span class="mono side">the short version first</span></header>
-    <div class="body">
-      <p class="tagline">{profile.tagline}</p>
-      <CutLine client:visible label="Cut along the line to read more">
-        <div class="prose" id="about">
-        <p>I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
-        <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
-        <p class="mono muted">{profile.workModes}</p>
-        </div>
-      </CutLine>
+    <header class="head"><h2 id="h-about">about</h2><span class="mono side">ten seconds, or two minutes</span></header>
+    <div class="body about">
+      <div class="story">
+        <p class="tagline">{profile.tagline}</p>
+        <p class="lede">I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
+      </div>
+      <dl class="facts mono">
+        <div><dt>based in</dt><dd>{profile.city}</dd></div>
+        <div><dt>working at</dt><dd><a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a>, since Jan 2022</dd></div>
+        <div><dt>mostly</dt><dd>backend, platforms, leading a team</dd></div>
+        <div><dt>open to</dt><dd>{profile.workModes}</dd></div>
+      </dl>
+      <div class="more">
+        <CutLine client:visible label="Cut along the line to read the longer story">
+          <div class="prose" id="about">
+            <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
+            <p class="mono muted">the details are in the projects below, one commit at a time.</p>
+          </div>
+        </CutLine>
+      </div>
     </div>
   </section>
 
   <div class="band" aria-hidden="true"></div>
 
   <section class="sec" id="work" aria-labelledby="h-work">
-    <header class="head"><h2 id="h-work">work</h2><span class="mono side">{work.length} projects · 2022 – now</span></header>
-    <div class="body">
-    <ol class="work">
-      {work.map((w, i) => (
-        <li class:list={{ lead: i === 0 }}>
-          <a href={`/work/${w.id}`} class="card" data-sound="tap" data-cursor="open">
-            <div class="card-top">
-              <span class="area mono">{w.data.area}{/\d{4}/.test(w.data.years) && ` · ${year(w.data.years)}`}</span>
+    <header class="head"><h2 id="h-work">projects</h2><span class="mono side">$ git log --oneline · {work.length} commits since 2022</span></header>
+    <div class="body projects">
+      <div class="log">
+        {work.map((w, i) => (
+          <details class="commit" name="proj" open={i === 0}>
+            <summary data-sound="tap" data-cursor="diff">
+              <span class="node" data-tone={statusLabel[w.data.status].tone} aria-hidden="true"></span>
+              <span class="hash mono">{hash(w.id)}</span>
+              <span class="ttl">{w.data.title}</span>
+              {i === 0 && <span class="ref mono">HEAD → main</span>}
               <span class="badge" data-tone={statusLabel[w.data.status].tone} title={statusLabel[w.data.status].text}>{statusLabel[w.data.status].short ?? statusLabel[w.data.status].text}</span>
+              <span class="when mono">{w.data.area}{/\d{4}/.test(w.data.years) && ` · ${year(w.data.years)}`}</span>
+            </summary>
+            <div class="diff">
+              <p class="cs">{w.data.summary}</p>
+              {w.data.stats.length > 0 && (
+                <ul class="plus mono">{w.data.stats.slice(0, 3).map((s) => <li><b>+ {s.value}</b> {s.label}</li>)}</ul>
+              )}
+              <div class="card-foot">
+                <ul class="tags">{w.data.stack.slice(0, 6).map((t) => <li class="mono">{t}</li>)}</ul>
+                <a class="go mono" href={`/work/${w.id}`} data-sound="tap" data-cursor="open">read the case study ↗</a>
+              </div>
             </div>
-            <h3>{w.data.title}</h3>
-            <p class="cs">{w.data.summary}</p>
-            {w.data.stats.length > 0 && (
-              <dl class="stats">{w.data.stats.slice(0, i === 0 ? 3 : 2).map((s) => <div><dt>{s.value}</dt><dd class="mono muted">{s.label}</dd></div>)}</dl>
-            )}
-            <div class="card-foot">
-              <ul class="tags">{w.data.stack.slice(0, i === 0 ? 6 : 4).map((t) => <li class="mono">{t}</li>)}</ul>
-              <span class="open" aria-hidden="true">↗</span>
-            </div>
-          </a>
-        </li>
-      ))}
-    </ol>
+          </details>
+        ))}
+        <p class="root mono" aria-hidden="true"><span class="node first"></span>jan 2022 · initial commit: joined Selegic as an intern</p>
+      </div>
     </div>
   </section>
 
@@ -130,10 +146,15 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   <div class="band" aria-hidden="true"></div>
 
   <section class="sec" id="pipeline" aria-labelledby="h-play">
-    <header class="head"><h2 id="h-play">try to break in</h2><span class="mono side">a toy copy of my access model</span></header>
-    <div class="body">
-      <p class="note n-play" aria-hidden="true">go on,<br />rob the place.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
-      <Heist client:visible />
+    <header class="head"><h2 id="h-play">take my pager</h2><span class="mono side">two small games about my job</span></header>
+    <div class="body toys">
+      <p class="note n-play" aria-hidden="true">30 seconds.<br />keep it green.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
+      <div class="views mono" role="radiogroup" aria-label="Which game">
+        <input type="radio" name="toy" id="toy-oncall" checked /><label for="toy-oncall" data-sound="toggle">on call</label>
+        <input type="radio" name="toy" id="toy-heist" /><label for="toy-heist" data-sound="toggle">break in</label>
+      </div>
+      <div class="toy t-oncall"><OnCall client:visible /></div>
+      <div class="toy t-heist"><Heist client:visible /></div>
     </div>
   </section>
 
@@ -184,6 +205,17 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
       place();
     }
   </script>
+  <script>
+    // Click the portrait to cycle its palette: colour, handheld green, newsprint, night.
+    const av = document.querySelector<HTMLElement>('[data-avatar]');
+    const LOOKS = ['', 'gb', 'ink', 'night'];
+    let look = 0;
+    try { look = Math.max(0, LOOKS.indexOf(sessionStorage.getItem('rd:look') ?? '')); } catch {}
+    if (av) {
+      av.dataset.look = LOOKS[look];
+      av.addEventListener('click', () => { look = (look + 1) % LOOKS.length; av.dataset.look = LOOKS[look]; try { sessionStorage.setItem('rd:look', LOOKS[look]); } catch {} });
+    }
+  </script>
 </Base>
 
 <style>
@@ -193,19 +225,19 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .band::before, .band::after, .head::after, .rule::before, .stage::after {
     content: ''; position: absolute; left: 50%; width: 100vw; translate: -50% 0; border-top: 1px dotted var(--rule-strong); pointer-events: none;
   }
-  .band { height: 30px; background: radial-gradient(circle, var(--rule-strong) 0.9px, transparent 1.1px) 3px 3px / 8px 8px; }
+  .band { height: 38px; background: radial-gradient(circle, var(--rule-strong) 0.9px, transparent 1.1px) 3px 3px / 8px 8px; }
   .band::before { top: 0; } .band::after, .head::after, .stage::after { bottom: 0; }
   .rule { height: 0; } .rule::before { top: 0; }
 
-  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 22px var(--gutter) 18px; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 34px var(--gutter) 24px; }
   .head h2 { font-family: var(--font-serif); font-weight: 400; font-size: 2.125rem; line-height: 1; letter-spacing: -0.015em; color: var(--ink); }
   .side { font-size: 0.6875rem; color: var(--muted); text-align: right; }
-  .body { position: relative; padding: 30px var(--gutter) 40px; }
+  .body { position: relative; padding: 44px var(--gutter) 88px; }
   em { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; color: var(--text); font-size: 1.1em; }
 
   /* Handwritten margin notes, only where there is a margin to write in. */
   .note { display: none; }
-  @media (min-width: 1240px) {
+  @media (min-width: 1400px) {
     .note { display: block; position: absolute; margin: 0; width: 190px; font-family: 'Caveat', cursive; font-weight: 500; font-size: 1.375rem; line-height: 1.1; color: var(--muted); pointer-events: none; }
     .note svg { display: block; margin-top: 6px; }
     .n-sky { left: calc(100% + 30px); top: 34px; rotate: -4deg; }
@@ -223,25 +255,33 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .taxi svg { rotate: 180deg; transition: rotate 0.35s var(--ease); } /* drawn nose-up; it drives down the page */
   .taxi:global(.up) svg { rotate: 0deg; }
   .taxi:global(.show) { opacity: 1; }
-  @media (min-width: 900px) { .taxi { display: block; } }
+  @media (min-width: 1000px) { .taxi { display: block; } }
 
   /* Hero: banner, portrait tile sitting on its edge, then the statement. */
-  .hero { position: relative; padding: 60px 0 44px; }
+  .hero { position: relative; padding: 60px 0 80px; }
   .identity { position: relative; display: flex; align-items: flex-end; gap: 20px; padding: 0 var(--gutter); margin-top: -52px; pointer-events: none; }
   .identity > * { pointer-events: auto; } /* the row overlaps the banner; only its contents should catch clicks */
   .avatar {
-    flex: none; width: 112px; height: 124px; border-radius: 26px; overflow: hidden; display: grid; place-items: end center;
-    background: var(--surface); border: 1px solid var(--rule-strong); box-shadow: 0 0 0 5px var(--paper), var(--shadow);
+    position: relative; flex: none; width: 124px; height: 124px; padding: 0; border-radius: 26px; overflow: hidden; cursor: pointer;
+    background: #fff; border: 1px solid var(--rule-strong); box-shadow: 0 0 0 5px var(--paper), var(--shadow);
     rotate: -3deg; transition: rotate 0.4s var(--ease), scale 0.4s var(--ease);
   }
   .avatar:hover { rotate: 0deg; scale: 1.04; }
-  .avatar :global(.portrait) { --pw: 100px; }
+  .avatar:active { scale: 0.97; }
+  .avatar :global(.portrait) { --pw: 100%; }
+  /* Scanlines over the picture, like an old screen. */
+  .avatar::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.16; background: repeating-linear-gradient(rgb(18 16 16) 0 1px, transparent 1px 3px); transition: opacity 0.2s; }
+  .avatar:hover::after { opacity: 0.3; }
+  .avatar :global(img), .avatar :global(canvas) { transition: filter 0.25s; }
+  .avatar[data-look='gb'] :global(:is(img, canvas)) { filter: grayscale(1) contrast(1.15) sepia(1) hue-rotate(50deg) saturate(2.2) brightness(0.92); }
+  .avatar[data-look='ink'] :global(:is(img, canvas)) { filter: grayscale(1) contrast(1.6); }
+  .avatar[data-look='night'] :global(:is(img, canvas)) { filter: invert(1) hue-rotate(180deg) saturate(1.3); }
   .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 0.8125rem; margin: 0 0 8px; }
   .eyebrow .mono { font-size: 0.75rem; }
   .eyebrow :global(svg) { width: 14px; height: 14px; }
   .sep { margin: 0 2px; opacity: 0.4; }
   .when { display: inline-flex; align-items: center; gap: 6px; }
-  h1 { margin: 30px var(--gutter) 0; font-size: 2.625rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; }
+  h1 { margin: 30px var(--gutter) 0; font-size: clamp(2.25rem, 4.6vw, 3.25rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; }
   /* Fixed line breaks on wide screens, so the heading is three lines in any font and nothing jumps when the web fonts arrive. */
   @media (min-width: 761px) { .ln { display: block; white-space: nowrap; } h1 em { line-height: 0.98; } }
   .sub { margin: 18px var(--gutter) 0; color: var(--text); font-size: 0.9375rem; }
@@ -252,50 +292,71 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
   .icon:hover { color: var(--ink); border-color: var(--rule-strong); }
 
-  .tagline { margin: 0 0 12px; font-size: 1.0625rem; color: var(--ink); }
-  .prose p { color: var(--text); font-size: 0.9375rem; line-height: 1.7; margin: 0 0 14px; }
+  /* About: the one-liner, the paragraph, a fact sheet beside them, and a longer story behind the cut line. */
+  .about { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 36px 56px; align-items: start; }
+  .tagline { margin: 0 0 18px; font-size: 1.625rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1.2; color: var(--ink); text-wrap: balance; }
+  .lede { margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--text); }
+  .facts { margin: 4px 0 0; display: grid; gap: 14px; padding-left: 22px; border-left: 1px dotted var(--rule-strong); }
+  .facts dt { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .facts dd { margin: 2px 0 0; font-size: 0.8125rem; line-height: 1.5; color: var(--ink); }
+  .facts a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+  .more { grid-column: 1 / -1; }
+  .prose p { color: var(--text); font-size: 1rem; line-height: 1.7; margin: 0 0 14px; max-width: 68ch; }
 
-  /* Work: v1's cards. The first project leads, full width, so the other six pair up. */
-  .work { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .lead { grid-column: 1 / -1; }
-  .card { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 20px; border: 1px solid var(--rule); border-radius: 16px; background: var(--surface); text-decoration: none; transition: border-color 0.25s, transform 0.25s var(--ease), box-shadow 0.25s; }
-  .card:hover { border-color: var(--rule-strong); transform: translateY(-2px); box-shadow: var(--shadow); }
-  .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 22px; }
-  .card .area { font-size: 0.6875rem; color: var(--muted); }
-  .card .badge { white-space: nowrap; font-size: 0.625rem; }
-  .card h3 { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); }
-  .lead h3 { font-size: 1.5rem; letter-spacing: -0.03em; }
-  .card p { margin: 0; }
-  .card .cs { font-size: 0.8125rem; line-height: 1.55; color: var(--text); max-width: 56ch; }
-  .lead .cs { font-size: 0.9375rem; }
-  .stats { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 4px 0 0; }
-  .stats dt { font-size: 1.125rem; font-weight: 600; color: var(--ink); letter-spacing: -0.02em; }
-  .lead .stats dt { font-size: 1.375rem; }
-  .stats dd { margin: 0; font-size: 0.6875rem; }
-  .card-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-top: auto; padding-top: 6px; }
+  .card-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
   .tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
   .tags li { font-size: 0.6875rem; padding: 1px 7px; border-radius: 6px; background: var(--rule); color: var(--text); }
-  .open { flex: none; color: var(--muted); font-size: 0.875rem; line-height: 1; transition: transform 0.25s var(--ease), color 0.2s; }
-  .card:hover .open { color: var(--ink); transform: translate(2px, -2px); }
+
+  /* A small two-way switch (which game). Radios, so it works without script. */
+  .views { display: inline-flex; gap: 14px; margin-bottom: 18px; font-size: 0.75rem; }
+  .views input { position: absolute; opacity: 0; pointer-events: none; }
+  .views label { position: relative; padding: 2px 0; color: var(--muted); cursor: pointer; transition: color 0.2s; }
+  .views label::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1.5px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform 0.3s var(--ease); }
+  .views input:checked + label { color: var(--ink); } .views input:checked + label::after { transform: scaleX(1); }
+  .views input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .toys .t-heist, .toys:has(#toy-heist:checked) .t-oncall { display: none; }
+  .toys:has(#toy-heist:checked) .t-heist { display: block; }
+
+  /* Projects as a commit history: a line down the left, one node per project, the diff opens underneath. */
+  .log { position: relative; padding-left: 26px; }
+  .log::before { content: ''; position: absolute; left: 6.5px; top: 14px; bottom: 12px; width: 1px; background: var(--rule-strong); }
+  .commit { position: relative; border-bottom: 1px solid var(--rule); }
+  .commit summary { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 13px 0; cursor: pointer; list-style: none; }
+  .commit summary::-webkit-details-marker { display: none; }
+  .node { position: absolute; left: -26px; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); border: 2px solid var(--muted); transition: scale 0.25s var(--ease), background 0.2s; }
+  .commit .node { top: 17px; }
+  .node[data-tone='ok'] { border-color: var(--ok); } .node[data-tone='pilot'] { border-color: var(--accent); }
+  .commit[open] .node, .commit summary:hover .node { scale: 1.25; }
+  .commit[open] .node[data-tone='ok'] { background: var(--ok); } .commit[open] .node[data-tone='pilot'] { background: var(--accent); } .commit[open] .node[data-tone='past'] { background: var(--muted); }
+  .hash { font-size: 0.6875rem; color: var(--warn); }
+  .ttl { font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); transition: translate 0.25s var(--ease); }
+  .commit summary:hover .ttl { translate: 3px 0; }
+  .ref { font-size: 0.625rem; padding: 1px 7px; border-radius: 5px; color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, transparent); }
+  .commit .badge { font-size: 0.625rem; white-space: nowrap; }
+  .when { margin-left: auto; font-size: 0.6875rem; color: var(--muted); }
+  .diff { display: grid; gap: 12px; padding: 2px 0 20px; animation: unfold 0.3s var(--ease); }
+  @keyframes unfold { from { opacity: 0; translate: 0 -6px; } }
+  .diff .cs { margin: 0; max-width: 60ch; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
+  .plus { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; display: grid; gap: 2px; font-size: 0.75rem; color: var(--text); background: color-mix(in oklab, var(--ok) 7%, transparent); border-left: 2px solid var(--ok); }
+  .plus b { color: var(--ok); font-weight: 500; margin-right: 6px; }
+  .go { flex: none; font-size: 0.75rem; color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+  .go:hover { text-decoration-color: currentColor; }
+  .root { position: relative; margin: 0; padding: 14px 0 0; font-size: 0.6875rem; color: var(--muted); }
+  .root .node { top: 15px; width: 10px; height: 10px; left: -24px; background: var(--muted); }
 
   #ask :global(h2), #ask :global(h2 + p) { display: none; }
   #stack :global(.top .k) { letter-spacing: 0.12em; font-weight: 500; }
 
   .contact { display: grid; gap: 4px; }
-  .statement { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); max-width: 24ch; }
-  .pile-body { padding-top: 18px; padding-bottom: 0; }
-
-  @media (max-width: 640px) {
-    .work { grid-template-columns: 1fr; }
-  }
+  .statement { margin: 0; font-size: 2.125rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); max-width: 24ch; }
+  .pile-body { padding-top: 22px; padding-bottom: 0; }
 
   /* Phones: iOS grouped lists and cards, system font and colours come from global.css. */
   @media (max-width: 760px) {
     :global(.page) { border-inline: 0; }
-    .hero { padding: 0 0 28px; }
+    .hero { padding: 0 0 44px; }
     .identity { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -44px; }
-    .avatar { width: 96px; height: 106px; border-radius: 22px; }
-    .avatar :global(.portrait) { --pw: 86px; }
+    .avatar { width: 104px; height: 104px; border-radius: 22px; }
     /* The clock fills in after load; give it its own line from the start so nothing below moves. */
     .when { flex-basis: 100%; }
     .dt { display: none; }
@@ -304,23 +365,17 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .hero .cta :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
     .icon { border: 0; background: rgb(127 127 127 / 0.14); color: var(--ink); }
     .soc { display: flex; flex-basis: 100%; gap: 8px; }
-    .prose p { font-size: 1rem; }
-    .head { padding: 18px var(--gutter) 14px; }
+    .head { padding: 24px var(--gutter) 16px; }
     .head h2 { font-size: 1.875rem; }
     .side { display: none; }
-    .body { padding: 22px var(--gutter) 30px; }
+    .when { margin-left: 0; flex-basis: 100%; }
+    .body { padding: 26px var(--gutter) 52px; }
+    .about { grid-template-columns: 1fr; gap: 26px; }
+    .tagline { font-size: 1.375rem; }
+    .facts { grid-template-columns: 1fr 1fr; padding: 18px 0 0; border-left: 0; border-top: 1px dotted var(--rule-strong); }
     .band { height: 22px; }
 
-    /* Projects: one grouped list, rows with a chevron, like Settings (as in v1). */
-    .work { grid-template-columns: 1fr; gap: 0; border-radius: 20px; overflow: hidden; background: var(--surface); }
-    .work li + li .card { border-top: 0.5px solid var(--rule-strong); }
-    .card { border: 0; border-radius: 0; padding: 14px 40px 14px 16px; position: relative; gap: 6px; background: transparent; }
-    .card::after { content: ''; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--rule-strong); border-top: 2px solid var(--rule-strong); transform: translateY(-50%) rotate(45deg); }
-    .card:hover { transform: none; box-shadow: none; }
-    .card:active { background: rgb(127 127 127 / 0.12); }
-    .card .cs, .lead .cs { font-size: 0.875rem; }
-    .tags, .stats, .open { display: none; }
-    .card h3, .lead h3 { font-size: 1.0625rem; letter-spacing: -0.01em; }
+    .card-foot { flex-direction: column; align-items: flex-start; }
 
     .contact .cta { display: grid; grid-template-columns: 1fr; }
     .contact .cta > :global(*) { justify-content: center; }

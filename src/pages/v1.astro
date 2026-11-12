@@ -130,6 +130,8 @@ const social = links.filter((l) => l.brand);
 </Base>
 
 <style>
+  /* v1 keeps its original 720px column. */
+  :global(.page) { --col: 720px; max-width: calc(720px + 2 * var(--gutter)); }
   .profile { padding: 0 var(--gutter) 8px; }
   .banner { height: 144px; margin: 0 calc(-1 * var(--gutter)); position: relative; overflow: hidden; }
   .banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, var(--paper)); pointer-events: none; }

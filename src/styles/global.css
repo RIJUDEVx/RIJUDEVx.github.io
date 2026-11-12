@@ -22,7 +22,7 @@
   --font-display: 'Inter Variable', system-ui, sans-serif;
   --font-serif: 'Instrument Serif', Georgia, serif; /* only for the rd monogram */
 
-  --col: 720px;
+  --col: 880px;
   --gutter: 24px;
   --radius: 12px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -48,6 +48,7 @@
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 html, body { margin: 0; }
+html { overflow-x: clip; } /* hidden popups and the wide banner must never add sideways scroll */
 body { overflow-x: clip; /* the home hero is wider than the column; never scroll sideways */
 
   background: var(--paper);

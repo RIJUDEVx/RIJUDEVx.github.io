@@ -1,16 +1,23 @@
 # Pixel portrait: python3 -I docs/pixel-mk.py <photo> <mask.png> <out-dir>
-# Writes portrait.png (48 px wide, 20 colours, cut out) and portrait-og.png (9x, for the share card).
+# Writes portrait.png (128 x 128, 18 flat colours, dark outline, white ground) and
+# portrait-og.png (the same, 4x, for the share card).
+# To use a hand-drawn or generated avatar instead, save it over src/assets/portrait.png
+# (square, ideally 128 px) and portrait-og.png (512 px); nothing else needs changing.
 import sys
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter, ImageChops
 src, maskp, out = sys.argv[1:4]
+N = 128
 im = Image.open(src).convert('RGB'); mask = Image.open(maskp).convert('L').resize(im.size)
-box = (140, 150, 700, 822)  # head and shoulders
-im = im.crop(box); mask = mask.crop(box).filter(ImageFilter.MinFilter(13))  # pull the edge in, off the background
-im = ImageEnhance.Contrast(im).enhance(1.15); im = ImageEnhance.Color(im).enhance(0.9)
-cols = 48; rows = round(cols * im.height / im.width)
-sm = im.resize((cols, rows), Image.BOX); mk = mask.resize((cols, rows), Image.BOX)
-q = sm.quantize(colors=20, method=Image.MAXCOVERAGE, kmeans=3, dither=Image.NONE).convert('RGBA')
-q.putalpha(mk.point(lambda v: 255 if v > 150 else 0))
-q.save(f'{out}/portrait.png', optimize=True)
-q.resize((cols * 9, rows * 9), Image.NEAREST).save(f'{out}/portrait-og.png', optimize=True)
-print(cols, rows)
+box = (150, 130, 720, 700)  # square: head and shoulders
+im = im.crop(box); mask = mask.crop(box).filter(ImageFilter.MinFilter(9))
+flat = im
+for _ in range(2): flat = flat.filter(ImageFilter.MedianFilter(5))  # flatten skin and cloth into paint-like areas
+flat = ImageEnhance.Color(flat).enhance(1.35); flat = ImageEnhance.Contrast(flat).enhance(1.2); flat = ImageEnhance.Brightness(flat).enhance(1.06)
+sm = flat.resize((N, N), Image.BOX)
+mk = mask.resize((N, N), Image.BOX).point(lambda v: 255 if v > 140 else 0)
+q = sm.quantize(colors=18, method=Image.MAXCOVERAGE, kmeans=4, dither=Image.NONE).convert('RGB').filter(ImageFilter.ModeFilter(3))
+outline = ImageChops.subtract(mk, mk.filter(ImageFilter.MinFilter(3)))  # one dark pixel around the figure
+res = Image.new('RGB', (N, N), (255, 255, 255))
+res.paste(q, (0, 0), mk); res.paste((28, 20, 22), (0, 0), outline)
+res.save(f'{out}/portrait.png', optimize=True)
+res.resize((N * 4, N * 4), Image.NEAREST).save(f'{out}/portrait-og.png', optimize=True)

@@ -10,6 +10,7 @@ const year = new Date().getFullYear();
     {links.map((l) => <li><a class="mono" href={l.href} data-sound="tap">{l.label.toLowerCase()}</a></li>)}
     <li><a class="mono" href="/llms.txt">llms.txt</a></li>
   </ul>
+  <p class="mono status"><i aria-hidden="true"></i>all systems operational · you have been here <span data-here>0s</span> · 0 incidents</p>
   <p class="mono player">
     <button type="button" data-music aria-pressed="false"><span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span data-music-label>play the 8-bit loop</span></button>
     <span class="sep">·</span>
@@ -33,6 +34,11 @@ const year = new Date().getFullYear();
   }
   greet();
   document.addEventListener('astro:page-load', greet);
+
+  // How long this visit has lasted, status-page style.
+  const here = document.querySelector<HTMLElement>('[data-here]');
+  const t0 = Date.now();
+  if (here) setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); here.textContent = s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`; }, 1000);
 
   // Music and sound switches.
   import { setMusic, musicPlaying, resumeMusic, isMuted, setMuted } from '../lib/sound';
@@ -82,6 +88,8 @@ const year = new Date().getFullYear();
   a { color: var(--muted); text-decoration: none; }
   a:hover { color: var(--ink); }
   kbd { font-family: var(--font-mono); font-size: 0.6875rem; border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+  .status { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .status i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 20%, transparent); }
   .player { display: flex; align-items: center; gap: 8px; }
   .player button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--text); }
   .player button:hover { color: var(--ink); }

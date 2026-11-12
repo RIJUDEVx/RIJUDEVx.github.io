@@ -117,9 +117,9 @@ function frame(body: Node[]): Node {
 // photo card): the pixel portrait stands on the right, the name sits on the left.
 // Name only, no designation.
 export function homeCard(): Node {
-  // The pixel portrait, pre-scaled 9x with hard edges (see docs/portrait.md).
+  // The pixel portrait, pre-scaled 4x with hard edges (see docs/portrait.md).
   const png = readFileSync('src/assets/portrait-og.png') // builds run from the project root;
-  const art: Node = { type: 'img', props: { src: `data:image/png;base64,${png.toString('base64')}`, width: 432, height: 522, style: { position: 'absolute', right: 84, top: H - 522 } } };
+  const art: Node = { type: 'img', props: { src: `data:image/png;base64,${png.toString('base64')}`, width: 400, height: 400, style: { position: 'absolute', right: 84, top: 115, borderRadius: 56, border: `6px solid ${colors.dot}` } } };
   const left = el('div', { position: 'absolute', left: PAD, top: PAD, bottom: PAD, width: 520, flexDirection: 'column', justifyContent: 'space-between' }, [
     el('div', { fontFamily: MONO, fontSize: 22, color: colors.muted, letterSpacing: 0.4 }, 'rijudevx.github.io'),
     el('div', { flexDirection: 'column' }, [

@@ -1,5 +1,5 @@
 ---
-// Pixel portrait: a 48 x 58 px image scaled up with hard edges. The <img> paints
+// Pixel portrait: a 128 px square image scaled with hard edges. The <img> paints
 // immediately (it is inlined); the script then swaps in a canvas that resolves
 // from coarse blocks to full detail, and re-pixelates under the cursor.
 import src from '../assets/portrait.png?inline';
@@ -7,7 +7,7 @@ interface Props { class?: string }
 const { class: cls } = Astro.props;
 ---
 <figure class:list={['pixel', cls]}>
-  <img src={src} width="48" height="58" alt="Pixel portrait of Riju Dev Purkayastha" data-pixel decoding="sync" />
+  <img src={src} width="128" height="128" alt="Pixel portrait of Riju Dev Purkayastha" data-pixel decoding="sync" />
 </figure>
 
 <script>
@@ -35,7 +35,7 @@ const { class: cls } = Astro.props;
       };
       const full = () => { ctx.clearRect(0, 0, W, H); ctx.drawImage(img, 0, 0); };
 
-      const steps = [3, 4, 6, 8, 12, 16, 24, W];
+      const steps = [4, 6, 8, 12, 16, 24, 32, 64, W];
       let i = 0;
       const tick = () => {
         if (steps[i] === W) full(); else drawAt(steps[i]);
@@ -48,7 +48,7 @@ const { class: cls } = Astro.props;
 
       // Under the cursor the picture falls back to big blocks.
       if (!matchMedia('(pointer: fine)').matches) return;
-      const B = 4, R = 9;
+      const B = 8, R = 22;
       let raf = 0;
       cv.addEventListener('pointermove', (e) => {
         const r = cv.getBoundingClientRect();
@@ -64,7 +64,7 @@ const { class: cls } = Astro.props;
               const k = (y * W + x) * 4; if (data.data[k + 3] < 128) continue;
               rr += data.data[k]; g += data.data[k + 1]; b += data.data[k + 2]; n++;
             }
-            if (n < (B * B) / 2) continue;
+            if (!n) continue;
             ctx.fillStyle = `rgb(${(rr / n) | 0} ${(g / n) | 0} ${(b / n) | 0})`;
             ctx.fillRect(bx, by, B, B);
           }
@@ -79,7 +79,7 @@ const { class: cls } = Astro.props;
 <style>
   .pixel { margin: 0; line-height: 0; }
   .pixel :global(img), .pixel :global(canvas) {
-    display: block; width: var(--pw, 240px); height: auto; aspect-ratio: 48 / 58;
+    display: block; width: var(--pw, 240px); height: auto; aspect-ratio: 1;
     image-rendering: pixelated; image-rendering: crisp-edges; image-rendering: pixelated;
   }
 </style>

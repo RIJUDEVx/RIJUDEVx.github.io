@@ -13,7 +13,7 @@
 
   const tabs = [
     { id: 'top', label: 'Home', href: '/#top', icon: 'home' },
-    { id: 'work', label: 'Work', href: '/#work', icon: 'stack' },
+    { id: 'work', label: 'Projects', href: '/#work', icon: 'stack' },
     { id: 'pipeline', label: 'Play', href: '/#pipeline', icon: 'spark' },
     { id: 'contact', label: 'Contact', href: '/#contact', icon: 'mail' },
   ] as const;
