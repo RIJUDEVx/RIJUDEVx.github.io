@@ -19,8 +19,16 @@ export function setMuted(muted: boolean) {
   window.dispatchEvent(new CustomEvent('sound:change', { detail: { muted } }));
 }
 
+// Browsers refuse audio until the visitor has clicked, tapped or pressed a key.
+// Until then nothing here touches AudioContext, so the console stays quiet.
+let unlocked = false;
+if (typeof window !== 'undefined') {
+  const unlock = () => { unlocked = true; removeEventListener('pointerdown', unlock, true); removeEventListener('keydown', unlock, true); };
+  addEventListener('pointerdown', unlock, true); addEventListener('keydown', unlock, true);
+}
+
 function audio(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined' || !unlocked) return null;
   if (!ctx) {
     const AC = window.AudioContext || (window as any).webkitAudioContext;
     if (!AC) return null;

@@ -25,7 +25,7 @@
 
   const page = createPageState();
   let bar: HTMLElement | undefined = $state();
-  const els: Record<string, HTMLElement> = {};
+  const els: Record<string, HTMLElement> = $state({});
   const bx = new Spring(0, { stiffness: 0.2, damping: 0.72 });
   const bw = new Spring(0, { stiffness: 0.2, damping: 0.72 });
   let mounted = $state(false);
