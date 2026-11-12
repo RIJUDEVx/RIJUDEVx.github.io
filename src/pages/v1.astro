@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import VersionSwitch from '../components/VersionSwitch.astro';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
 import Banner from '../components/Banner.svelte';
@@ -20,7 +19,6 @@ const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.
 const social = links.filter((l) => l.brand);
 ---
 <Base title="v1" noindex>
-  <VersionSwitch />
   <Intro slot="intro" client:load name={profile.name} />
 
   <section class="profile" id="top">

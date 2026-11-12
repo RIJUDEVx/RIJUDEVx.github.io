@@ -5,7 +5,6 @@
 // projects in the about text are underlined peeks with popup cards.
 // Phones get iOS grouped lists and cards (see the 760px block at the bottom).
 import { getCollection } from 'astro:content';
-import VersionSwitch from '../components/VersionSwitch.astro';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
 import Ascii from '../components/Ascii.astro';
@@ -30,17 +29,15 @@ const P = Object.fromEntries(work.map((w) => [w.id, {
   summary: w.data.summary, stats: w.data.stats,
 }]));
 const social = links.filter((l) => l.brand);
-const brandFiles = import.meta.glob('../assets/brands/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../assets/brands/${s.icon}.svg`] ?? '').replace(/<\?xml[^>]*>/, '').replace(/\s(width|height)="[^"]*"/g, '') }));
+const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
 ---
 <Base page="home" faq={questions}>
-  <VersionSwitch />
   <Intro slot="intro" client:load name={profile.name} />
 
   <section class="hero" id="top">
     <Ascii class="portrait" />
     <div class="copy">
-      <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep">·</span><Icon name="clock" /><Clock client:load variant="hero" /></p>
+      <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep dt">·</span><span class="when"><Icon name="clock" /><Clock client:load variant="hero" /></span></p>
       <h1>
         I'm Riju. I build backend platforms, Salesforce tooling and native apps,{' '}
         <span class="dim">and lead the team behind Selegic CRM.</span>
@@ -143,6 +140,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../asset
   .eyebrow .mono { font-size: 0.75rem; }
   .eyebrow :global(svg) { width: 14px; height: 14px; }
   .sep { margin: 0 2px; opacity: 0.4; }
+  .when { display: inline-flex; align-items: center; gap: 6px; }
   h1 { margin-top: 22px; font-size: clamp(2rem, 3.8vw, 3.1rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 20ch; }
   .sub { margin: 18px 0 0; color: var(--text); font-size: 0.9375rem; }
   .sub a { color: var(--ink); text-decoration-color: var(--rule-strong); }
@@ -172,6 +170,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../asset
 
   .tagline { margin: 0 0 12px; font-size: 1rem; color: var(--ink); }
   .keys { max-width: 560px; }
+  #stack :global(.top .k) { display: none; } /* the section label already says Stack */
   .play-lead { margin: -8px 0 18px; color: var(--muted); font-size: 0.875rem; }
   .contact { padding-bottom: 72px; display: grid; gap: 16px; }
   .contact .label { margin: 0; }
@@ -191,6 +190,9 @@ const keys = stackIcons.map((s) => ({ label: s.label, svg: (brandFiles[`../asset
     .hero { grid-template-columns: 1fr; padding: 72px 16px 8px; justify-items: center; text-align: center; }
     .portrait :global(pre) { font-size: 4.6px; }
     .eyebrow { justify-content: center; }
+    /* The clock fills in after load; give it its own line from the start so nothing below moves. */
+    .when { flex-basis: 100%; justify-content: center; }
+    .dt { display: none; }
     h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.03em; margin-inline: auto; }
     .sub { font-size: 0.9375rem; color: var(--muted); }
     .cta { justify-content: center; gap: 8px; }

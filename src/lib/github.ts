@@ -41,20 +41,3 @@ export function getContributions(user: string): Promise<Contributions | null> {
   }
   return cache.get(user)!;
 }
-
-/** Summaries for compact displays. */
-export function summarise(c: Contributions) {
-  const weeks: { start: string; count: number }[] = [];
-  for (let i = 0; i < c.days.length; i += 7) {
-    const chunk = c.days.slice(i, i + 7);
-    weeks.push({ start: chunk[0].date, count: chunk.reduce((n, d) => n + d.count, 0) });
-  }
-  const weekday = [0, 0, 0, 0, 0, 0, 0];
-  for (const d of c.days) weekday[new Date(`${d.date}T00:00:00Z`).getUTCDay()] += d.count;
-  let streak = 0, best = 0, run = 0;
-  for (const d of c.days) { run = d.count > 0 ? run + 1 : 0; best = Math.max(best, run); }
-  for (let i = c.days.length - 1; i >= 0 && c.days[i].count > 0; i--) streak++;
-  const activeDays = c.days.filter((d) => d.count > 0).length;
-  const busiest = c.days.reduce((a, b) => (b.count > a.count ? b : a), c.days[0]);
-  return { weeks, weekday, longestStreak: best, currentStreak: streak, activeDays, busiest };
-}

@@ -1,14 +1,23 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Lenis from 'lenis';
-  import 'lenis/dist/lenis.css';
+  import 'lenis/dist/lenis.css'; // tiny; the library itself loads lazily below
 
   // Keeps same-page anchors clear of the sticky 60px header plus some air.
   const OFFSET = -72;
 
   onMount(() => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Touch screens already scroll natively (Lenis leaves them alone anyway), so phones
+    // never download it. Elsewhere it loads after the page is up, not in the first bundle.
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(pointer: fine)').matches) return;
+    let cleanup = () => {};
+    let gone = false;
+    import('lenis').then(({ default: Lenis }) => {
+      if (!gone) cleanup = start(Lenis);
+    });
+    return () => { gone = true; cleanup(); };
+  });
 
+  function start(Lenis: typeof import('lenis').default) {
     const lenis = new Lenis({ autoRaf: false });
     let stopped = false;
     let rafId = 0;
@@ -105,5 +114,5 @@
       window.removeEventListener('scroll', save);
       lenis.destroy();
     };
-  });
+  }
 </script>

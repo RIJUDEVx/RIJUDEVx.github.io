@@ -36,10 +36,6 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
         try { t = localStorage.getItem('rd:theme'); } catch (e) {}
         if (!t) t = 'dark'; // dark by default; the toggle remembers a choice
         document.documentElement.dataset.theme = t;
-        // tl;dr or the long version (pages that support it), before first paint.
-        var d = null;
-        try { d = localStorage.getItem('rd:depth'); } catch (e) {}
-        document.documentElement.dataset.depth = d === 'long' ? 'long' : 'short';
         // First visit this session on the home page: Intro.svelte plays.
         var seen = null;
         try { seen = sessionStorage.getItem('rd:intro'); } catch (e) {}

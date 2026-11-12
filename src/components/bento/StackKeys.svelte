@@ -3,7 +3,10 @@
   // and shows its name on a small LCD readout; clicking presses it with a click.
   // Typing a letter while the tile is hovered presses the matching key.
   import { play } from '../../lib/sound';
-  interface Props { items: { label: string; svg: string }[] }
+  // Logos ship in this island's own JS chunk (cached, compressed) instead of the page HTML.
+  const files = import.meta.glob('../../assets/brands/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+  const svgFor = (icon: string) => (files[`../../assets/brands/${icon}.svg`] ?? '').replace(/<\?xml[^>]*>/, '').replace(/\s(width|height)="[^"]*"/g, '');
+  interface Props { items: { label: string; icon: string }[] }
   let { items }: Props = $props();
 
   let lit = $state<number | null>(null);
@@ -38,7 +41,7 @@
       <button class="key" class:lit={lit === i} class:down={pressed === i}
               aria-label={it.label} title={it.label}
               onpointerenter={() => (lit = i)} onfocus={() => (lit = i)} onclick={() => press(i)}>
-        <span class="cap">{@html it.svg}</span>
+        <span class="cap">{@html svgFor(it.icon)}</span>
       </button>
     {/each}
   </div>

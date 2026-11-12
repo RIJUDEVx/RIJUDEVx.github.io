@@ -59,6 +59,12 @@ days.forEach((d, i) => {
   }
 });
 
+// The cells as one plain string: no per-element scoping attributes, one shared cell shape.
+const body = graph
+  ? `<defs><rect id="ghc" width="${CELL}" height="${CELL}" rx="2"/></defs>` +
+    months.map((m) => `<text class="month" x="${m.x}" y="10">${m.text}</text>`).join('') +
+    cells.map((c) => `<use href="#ghc" class="l${c.level}" x="${c.x}" y="${c.y}"><title>${c.title}</title></use>`).join('')
+  : '';
 const total = graph ? graph.total.lastYear.toLocaleString('en-US') : '';
 ---
 <div class="gh">
@@ -69,12 +75,7 @@ const total = graph ? graph.total.lastYear.toLocaleString('en-US') : '';
         <a href={profileUrl} target="_blank" rel="noopener" data-sound="tap">view profile ↗</a>
       </div>
       <svg class="grid" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} width="100%" role="img" aria-label={`${total} GitHub contributions in the last year`}>
-        {months.map((m) => <text class="month" x={m.x} y={10}>{m.text}</text>)}
-        {cells.map((c) => (
-          <rect class={`l${c.level}`} x={c.x} y={c.y} width={CELL} height={CELL} rx="2">
-            <title>{c.title}</title>
-          </rect>
-        ))}
+        <Fragment set:html={body} />
       </svg>
       <p class="total"><strong>{total}</strong> contributions in the last year</p>
       <p class="note mono muted">most of my work lives in private company repos</p>
@@ -92,12 +93,12 @@ const total = graph ? graph.total.lastYear.toLocaleString('en-US') : '';
   .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); }
   .head a { color: var(--ink); }
   .grid { display: block; width: 100%; height: auto; }
-  .month { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
-  .l0 { fill: var(--rule); }
-  .l1 { fill: color-mix(in oklab, var(--accent) 25%, transparent); }
-  .l2 { fill: color-mix(in oklab, var(--accent) 45%, transparent); }
-  .l3 { fill: color-mix(in oklab, var(--accent) 70%, transparent); }
-  .l4 { fill: color-mix(in oklab, var(--accent) 100%, transparent); }
+  .grid :global(.month) { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+  .grid :global(.l0) { fill: var(--rule); }
+  .grid :global(.l1) { fill: color-mix(in oklab, var(--accent) 25%, transparent); }
+  .grid :global(.l2) { fill: color-mix(in oklab, var(--accent) 45%, transparent); }
+  .grid :global(.l3) { fill: color-mix(in oklab, var(--accent) 70%, transparent); }
+  .grid :global(.l4) { fill: color-mix(in oklab, var(--accent) 100%, transparent); }
   .total { margin: 0; color: var(--text); }
   .total strong { color: var(--ink); font-weight: 600; }
   .note { margin: 0; font-size: 0.75rem; }
