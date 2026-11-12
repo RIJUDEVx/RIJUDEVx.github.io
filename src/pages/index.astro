@@ -1,13 +1,20 @@
 ---
-// Home. v1's single centred column (720px, every section on the same left edge)
-// and v1's project cards, with the current hero, Experience, Activity, Ask,
-// Stack, Playground and Contact. v1's tagline sits above the cut line, and the
-// projects in the about text are underlined peeks with popup cards.
+// Home. One 720px column drawn like a ruled page: dotted rails down the sides,
+// a dotted band between sections, serif section names. The quirks:
+//  - the banner is Howrah Bridge in pixels, lit by the real time in Kolkata;
+//  - the portrait is a 48px pixel picture that re-pixelates under the cursor;
+//  - handwritten notes in the margins (wide screens only);
+//  - the about text opens by cutting along a line, projects in it peek on hover;
+//  - a toy CRM pipeline, a stack you can type on, and a backlog you can throw.
 // Phones get iOS grouped lists and cards (see the 760px block at the bottom).
+import '@fontsource/instrument-serif/400-italic.css';
+import '@fontsource/caveat/latin-500.css';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.svelte';
 import Pixel from '../components/Pixel.astro';
+import Skyline from '../components/Skyline.astro';
+import Backlog from '../components/Backlog.svelte';
 import CutLine from '../components/CutLine.svelte';
 import Clock from '../components/Clock.svelte';
 import CopyEmail from '../components/CopyEmail.svelte';
@@ -19,7 +26,7 @@ import StackKeys from '../components/bento/StackKeys.svelte';
 import Brand from '../components/Brand.astro';
 import Icon from '../components/Icon.astro';
 import Peek from '../components/Peek.svelte';
-import { profile, links, questions, experience, statusLabel, stackIcons, education } from '../data/site';
+import { profile, links, questions, experience, statusLabel, stackIcons } from '../data/site';
 
 const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 const year = (y: string) => (y.match(/\d{4}/g) ?? []).join('–').replace(/^(\d{4})–\1$/, '$1') || '—';
@@ -35,35 +42,49 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   <Intro slot="intro" client:load name={profile.name} />
 
   <section class="hero" id="top">
-    <Pixel class="portrait" />
-    <div class="copy">
+    <div class="stage">
+      <Skyline />
+      <p class="note n-sky" aria-hidden="true">the sky follows<br />kolkata time.<br />click it to skip ahead.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
+    </div>
+    <div class="identity">
+      <div class="avatar"><Pixel class="portrait" /></div>
+      <p class="note n-me" aria-hidden="true">me, at 48 pixels.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
       <p class="eyebrow"><span class="mono">@{profile.handle}</span><span class="sep">/</span><Icon name="pin" />{profile.city}<span class="sep dt">·</span><span class="when"><Icon name="clock" /><Clock client:load variant="hero" /></span></p>
-      <h1>
-        I'm Riju. I build backend platforms, Salesforce tooling and native apps,{' '}
-        <span class="dim">and lead the team behind Selegic CRM.</span>
-      </h1>
-      <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · 4+ years · {work.length} projects</p>
-      <div class="cta">
-        <CopyEmail client:load email={profile.email} big />
-        <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
-        <span class="soc">{social.map((l) => <a class="icon" href={l.href} target="_blank" rel="noopener me" aria-label={l.label} data-sound="tap"><Brand name={l.brand!} mono size={16} /></a>)}</span>
-      </div>
+    </div>
+    <h1>
+      <span class="ln">I'm Riju. I build backend platforms,</span>{' '}
+      <span class="ln">Salesforce tooling and native apps,</span>{' '}
+      <em class="ln">and lead the team behind Selegic CRM.</em>
+    </h1>
+    <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · 4+ years · {work.length} projects</p>
+    <div class="cta">
+      <CopyEmail client:load email={profile.email} big />
+      <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
+      <span class="soc">{social.map((l) => <a class="icon" href={l.href} target="_blank" rel="noopener me" aria-label={l.label} data-sound="tap"><Brand name={l.brand!} mono size={16} /></a>)}</span>
     </div>
   </section>
 
-  <div class="sec about-wrap">
-    <p class="tagline">{profile.tagline}</p>
-    <CutLine client:visible label="Cut along the line to read more">
-      <div class="prose" id="about">
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" aria-labelledby="h-about">
+    <header class="head"><h2 id="h-about">about</h2><span class="mono side">the short version first</span></header>
+    <div class="body">
+      <p class="tagline">{profile.tagline}</p>
+      <CutLine client:visible label="Cut along the line to read more">
+        <div class="prose" id="about">
         <p>I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
         <p>The thread through all of it is the backend: data that stays correct, access control that holds, and releases nobody has to hold their breath for. I'm happiest owning a system end to end, from the schema to the deploy.</p>
         <p class="mono muted">{profile.workModes}</p>
-      </div>
-    </CutLine>
-  </div>
+        </div>
+      </CutLine>
+    </div>
+  </section>
 
-  <section class="sec" id="work">
-    <div class="label-row"><h2 class="label mono">Work</h2><span class="mono muted">{work.length} projects · 2022 – now</span></div>
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" id="work" aria-labelledby="h-work">
+    <header class="head"><h2 id="h-work">work</h2><span class="mono side">{work.length} projects · 2022 – now</span></header>
+    <div class="body">
     <ol class="work">
       {work.map((w, i) => (
         <li class:list={{ lead: i === 0 }}>
@@ -85,72 +106,116 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
         </li>
       ))}
     </ol>
-  </section>
-
-  <section class="sec" id="experience">
-    <h2 class="label mono">Experience</h2>
-    <ExperienceToggle client:visible {...experience} />
-  </section>
-
-  <section class="sec" id="activity">
-    <h2 class="label mono">Activity</h2>
-    <GitHubGraph user="RIJUDEVx" />
-  </section>
-
-  <section class="sec" id="ask" aria-label="Ask">
-    <p class="label mono">Ask</p>
-    <Questions client:visible questions={questions} />
-  </section>
-
-  <section class="sec" id="stack" aria-label="Stack">
-    <StackKeys client:visible items={keys} />
-  </section>
-
-  <section class="sec play" id="pipeline">
-    <div class="label-row"><h2 class="label mono">Playground</h2><span class="mono muted">a toy version of what I build</span></div>
-    <p class="play-lead">Drag a deal to the next stage and close it.</p>
-    <Pipeline client:visible />
-  </section>
-
-  <section class="sec contact" id="contact">
-    <h2 class="label mono">Contact</h2>
-    <p class="statement">Building something that needs a backend owned end to end?{' '}<span class="dim">I'd like to hear about it.</span></p>
-    <div class="cta">
-      <CopyEmail client:visible email={profile.email} big />
-      <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={14} />LinkedIn</a>
     </div>
   </section>
 
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" id="experience" aria-labelledby="h-exp">
+    <header class="head"><h2 id="h-exp">experience</h2><span class="mono side">one company, many hats</span></header>
+    <div class="body"><ExperienceToggle client:visible {...experience} /></div>
+    <div class="rule" aria-hidden="true"></div>
+    <div class="body" id="activity"><GitHubGraph user="RIJUDEVx" /></div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" id="ask" aria-labelledby="h-ask">
+    <header class="head"><h2 id="h-ask">before you hire me</h2><span class="mono side">go on, ask</span></header>
+    <div class="body"><Questions client:visible questions={questions} /></div>
+    <div class="rule" aria-hidden="true"></div>
+    <div class="body" id="stack"><StackKeys client:visible items={keys} /></div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" id="pipeline" aria-labelledby="h-play">
+    <header class="head"><h2 id="h-play">try what I build</h2><span class="mono side">a toy CRM pipeline</span></header>
+    <div class="body">
+      <p class="note n-play" aria-hidden="true">go on,<br />close a deal.<svg viewBox="0 0 60 40" width="46" height="31" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M56 6C40 4 18 10 6 32"/><path d="M5 20l1 12 11-5"/></svg></p>
+      <p class="play-lead">Drag a deal to the next stage and close it.</p>
+      <Pipeline client:visible />
+    </div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" id="contact" aria-labelledby="h-hi">
+    <header class="head"><h2 id="h-hi">say hi</h2><span class="mono side">{profile.workModes}</span></header>
+    <div class="body contact">
+      <p class="statement">Building something that needs a backend owned end to end?{' '}<em>I'd like to hear about it.</em></p>
+      <div class="cta">
+        <CopyEmail client:visible email={profile.email} big />
+        <a class="pill" href={links.find((l) => l.label === 'LinkedIn')!.href} target="_blank" rel="noopener" data-sound="tap"><Brand name="linkedin" mono size={14} />LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="band" aria-hidden="true"></div>
+
+  <section class="sec" aria-labelledby="h-backlog">
+    <header class="head"><h2 id="h-backlog">the backlog</h2><span class="mono side">everything I'll get to "later"</span></header>
+    <div class="body pile-body"><Backlog client:visible /></div>
+  </section>
 </Base>
 
 <style>
-  /* One column, one left edge: every section uses the page gutter and nothing more. */
-  .sec { padding: 80px var(--gutter) 0; }
-  .label { font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 0 0 18px; }
-  .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 18px; }
-  .label-row .label { margin: 0; }
-  .label-row .mono { font-size: 0.6875rem; }
-  .dim { color: var(--muted); }
-  .ink { color: var(--ink); }
-  .small { font-size: 0.8125rem; }
+  /* The ruled page: dotted rails at the column edges, lines that run the full window width. */
+  :global(.page) { border-inline: 1px dotted var(--rule-strong); }
+  .band, .head, .rule, .stage { position: relative; }
+  .band::before, .band::after, .head::after, .rule::before, .stage::after {
+    content: ''; position: absolute; left: 50%; width: 100vw; translate: -50% 0; border-top: 1px dotted var(--rule-strong); pointer-events: none;
+  }
+  .band { height: 30px; background: radial-gradient(circle, var(--rule-strong) 0.9px, transparent 1.1px) 3px 3px / 8px 8px; }
+  .band::before { top: 0; } .band::after, .head::after, .stage::after { bottom: 0; }
+  .rule { height: 0; } .rule::before { top: 0; }
 
-  /* Hero */
-  /* The hero keeps its original 1120px width; it breaks out of the 720px column, centred on it. */
-  .hero { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center; padding: 112px 24px 32px; width: min(1120px, 100vw); position: relative; left: 50%; translate: -50% 0; }
-  .hero :global(.portrait) { --pw: 250px; }
-  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 0.8125rem; margin: 0; }
+  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 22px var(--gutter) 18px; }
+  .head h2 { font-family: var(--font-serif); font-weight: 400; font-size: 2.125rem; line-height: 1; letter-spacing: -0.015em; color: var(--ink); }
+  .side { font-size: 0.6875rem; color: var(--muted); text-align: right; }
+  .body { position: relative; padding: 30px var(--gutter) 40px; }
+  em { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.01em; color: var(--text); font-size: 1.1em; }
+
+  /* Handwritten margin notes, only where there is a margin to write in. */
+  .note { display: none; }
+  @media (min-width: 1240px) {
+    .note { display: block; position: absolute; margin: 0; width: 190px; font-family: 'Caveat', cursive; font-weight: 500; font-size: 1.375rem; line-height: 1.1; color: var(--muted); pointer-events: none; }
+    .note svg { display: block; margin-top: 6px; }
+    .n-sky { left: calc(100% + 30px); top: 34px; rotate: -4deg; }
+    .n-me { right: calc(100% + 26px); top: 6px; text-align: right; rotate: 3deg; }
+    .n-me svg { margin-left: auto; scale: -1 1; }
+    .n-play { right: calc(100% + 26px); top: 96px; text-align: right; rotate: -3deg; }
+    .n-play svg { margin-left: auto; scale: -1 1; }
+  }
+
+  /* Hero: banner, portrait tile sitting on its edge, then the statement. */
+  .hero { position: relative; padding: 60px 0 44px; }
+  .identity { position: relative; display: flex; align-items: flex-end; gap: 20px; padding: 0 var(--gutter); margin-top: -52px; pointer-events: none; }
+  .identity > * { pointer-events: auto; } /* the row overlaps the banner; only its contents should catch clicks */
+  .avatar {
+    flex: none; width: 112px; height: 124px; border-radius: 26px; overflow: hidden; display: grid; place-items: end center;
+    background: var(--surface); border: 1px solid var(--rule-strong); box-shadow: 0 0 0 5px var(--paper), var(--shadow);
+    rotate: -3deg; transition: rotate 0.4s var(--ease), scale 0.4s var(--ease);
+  }
+  .avatar:hover { rotate: 0deg; scale: 1.04; }
+  .avatar :global(.portrait) { --pw: 100px; }
+  .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: var(--muted); font-size: 0.8125rem; margin: 0 0 8px; }
   .eyebrow .mono { font-size: 0.75rem; }
   .eyebrow :global(svg) { width: 14px; height: 14px; }
   .sep { margin: 0 2px; opacity: 0.4; }
   .when { display: inline-flex; align-items: center; gap: 6px; }
-  h1 { margin-top: 22px; font-size: clamp(2rem, 3.8vw, 3.1rem); font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; max-width: 20ch; }
-  .sub { margin: 18px 0 0; color: var(--text); font-size: 0.9375rem; }
+  h1 { margin: 30px var(--gutter) 0; font-size: 2.625rem; font-weight: 600; letter-spacing: -0.04em; line-height: 1.08; }
+  /* Fixed line breaks on wide screens, so the heading is three lines in any font and nothing jumps when the web fonts arrive. */
+  @media (min-width: 761px) { .ln { display: block; white-space: nowrap; } h1 em { line-height: 0.98; } }
+  .sub { margin: 18px var(--gutter) 0; color: var(--text); font-size: 0.9375rem; }
   .sub a { color: var(--ink); text-decoration-color: var(--rule-strong); }
-  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 26px; }
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 24px; }
+  .hero .cta { padding: 0 var(--gutter); }
   .soc { display: contents; }
   .icon { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--text); border: 1px solid var(--rule); transition: color 0.15s, border-color 0.15s; }
   .icon:hover { color: var(--ink); border-color: var(--rule-strong); }
-  .about-wrap { padding-top: 8px; }
+
+  .tagline { margin: 0 0 12px; font-size: 1.0625rem; color: var(--ink); }
   .prose p { color: var(--text); font-size: 0.9375rem; line-height: 1.7; margin: 0 0 14px; }
 
   /* Work: v1's cards. The first project leads, full width, so the other six pair up. */
@@ -177,46 +242,38 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .card:hover .open { color: var(--ink); transform: translate(2px, -2px); }
 
   #ask :global(h2), #ask :global(h2 + p) { display: none; }
-
-  .tagline { margin: 0 0 12px; font-size: 1rem; color: var(--ink); }
-  /* The keyboard brings its own label row: "Stack" on the left, the readout on the right. */
-  #stack :global(.top) { margin-bottom: 6px; }
   #stack :global(.top .k) { letter-spacing: 0.12em; font-weight: 500; }
-  .play-lead { margin: -8px 0 18px; color: var(--muted); font-size: 0.875rem; }
-  .contact { padding-bottom: 72px; display: grid; gap: 16px; }
-  .contact .label { margin: 0; }
-  .statement { margin: 0; font-size: 1.625rem; font-weight: 500; letter-spacing: -0.03em; line-height: 1.2; color: var(--ink); max-width: 26ch; }
 
-  @media (max-width: 960px) {
-    .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 96px; }
-    .hero :global(.portrait) { --pw: 200px; }
-  }
+  .play-lead { margin: -6px 0 18px; color: var(--muted); font-size: 0.875rem; }
+  .contact { display: grid; gap: 4px; }
+  .statement { margin: 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); max-width: 24ch; }
+  .pile-body { padding-top: 18px; padding-bottom: 0; }
+
   @media (max-width: 640px) {
     .work { grid-template-columns: 1fr; }
   }
 
   /* Phones: iOS grouped lists and cards, system font and colours come from global.css. */
   @media (max-width: 760px) {
-    .sec { padding-top: 40px; }
-    .hero { grid-template-columns: 1fr; padding: 72px 16px 8px; justify-items: center; text-align: center; }
-    .hero :global(.portrait) { --pw: 180px; }
-    .eyebrow { justify-content: center; }
+    :global(.page) { border-inline: 0; }
+    .hero { padding: 0 0 28px; }
+    .identity { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -44px; }
+    .avatar { width: 96px; height: 106px; border-radius: 22px; }
+    .avatar :global(.portrait) { --pw: 86px; }
     /* The clock fills in after load; give it its own line from the start so nothing below moves. */
-    .when { flex-basis: 100%; justify-content: center; }
+    .when { flex-basis: 100%; }
     .dt { display: none; }
-    h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.03em; margin-inline: auto; }
-    .sub { font-size: 0.9375rem; color: var(--muted); }
-    .cta { justify-content: center; gap: 8px; }
-    .soc { display: flex; flex-basis: 100%; justify-content: center; gap: 10px; margin-top: 4px; }
-    .cta :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
-    .icon { width: 36px; height: 36px; border: 0; background: rgb(127 127 127 / 0.14); color: var(--ink); }
+    h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.035em; margin-top: 18px; }
+    .sub { color: var(--muted); }
+    .hero .cta :global(.copy.pill) { background: var(--accent); color: #fff; border: 0; }
+    .icon { border: 0; background: rgb(127 127 127 / 0.14); color: var(--ink); }
+    .soc { display: flex; flex-basis: 100%; gap: 8px; }
     .prose p { font-size: 1rem; }
-
-    .label { font-size: 0.8125rem; letter-spacing: 0.02em; text-transform: none; color: var(--muted); padding-left: 16px; }
-    .label-row span.mono { display: none; }
-    .label-row .label { font-size: 0.8125rem; }
-    .label, #stack :global(.top .k) { font-family: var(--font-sans); font-weight: 600; }
-    #stack :global(.top .k) { font-size: 0.8125rem; letter-spacing: 0.02em; text-transform: none; padding-left: 16px; }
+    .head { padding: 18px var(--gutter) 14px; }
+    .head h2 { font-size: 1.875rem; }
+    .side { display: none; }
+    .body { padding: 22px var(--gutter) 30px; }
+    .band { height: 22px; }
 
     /* Projects: one grouped list, rows with a chevron, like Settings (as in v1). */
     .work { grid-template-columns: 1fr; gap: 0; border-radius: 20px; overflow: hidden; background: var(--surface); }
@@ -225,13 +282,10 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .card::after { content: ''; position: absolute; right: 18px; top: 50%; width: 8px; height: 8px; border-right: 2px solid var(--rule-strong); border-top: 2px solid var(--rule-strong); transform: translateY(-50%) rotate(45deg); }
     .card:hover { transform: none; box-shadow: none; }
     .card:active { background: rgb(127 127 127 / 0.12); }
-    .card .cs { font-size: 0.875rem; }
+    .card .cs, .lead .cs { font-size: 0.875rem; }
     .tags, .stats, .open { display: none; }
-    .lead h3 { font-size: 1.0625rem; letter-spacing: -0.01em; }
-    .card h3 { font-size: 1.0625rem; }
-    .lead .cs { font-size: 0.875rem; }
+    .card h3, .lead h3 { font-size: 1.0625rem; letter-spacing: -0.01em; }
 
-    .contact { padding-bottom: 32px; }
     .contact .cta { display: grid; grid-template-columns: 1fr; }
     .contact .cta > :global(*) { justify-content: center; }
     .contact .cta :global(.copy.pill) { width: 100%; text-align: center; }

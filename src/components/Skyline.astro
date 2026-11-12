@@ -1,0 +1,201 @@
+---
+// The banner: Howrah Bridge in pixels. The sky is whatever time it is in Kolkata
+// right now (sun, moon, stars, lit windows). Click the picture to skip three
+// hours ahead; the chip puts it back. The river ripples under the cursor.
+---
+<div class="sky" data-sky>
+  <canvas width="180" height="50" role="img" aria-label="Pixel drawing of Howrah Bridge in Kolkata. The sky follows the local time."></canvas>
+  <button class="chip mono" type="button" data-sky-chip aria-live="polite">kolkata</button>
+</div>
+
+<script>
+  import { play } from '../lib/sound';
+
+  const root = document.querySelector<HTMLElement>('[data-sky]');
+  const cv = root?.querySelector('canvas');
+  const chip = root?.querySelector<HTMLButtonElement>('[data-sky-chip]');
+  const ctx = cv?.getContext('2d');
+  if (root && cv && chip && ctx) {
+    const W = 180, H = 50, HZ = 34; // HZ: where the river starts
+    type RGB = [number, number, number];
+    const hex = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+    const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    const css = (c: RGB, a = 1) => `rgb(${c[0] | 0} ${c[1] | 0} ${c[2] | 0} / ${a})`;
+    const clamp = (v: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
+
+    // Sky colours through the day: [hour, top, horizon].
+    const KEYS: [number, RGB, RGB][] = ([
+      [0, '#070b1f', '#141a3d'], [4.5, '#0b1030', '#2a2a5e'], [5.75, '#3a3a7a', '#f0a36b'], [7, '#7db9e8', '#f6dcb8'],
+      [10, '#5aa9e6', '#cfe9f7'], [15.5, '#62aee6', '#d9ecf5'], [17.25, '#4a4a9a', '#f59b55'], [18.5, '#2a2560', '#d9603f'],
+      [19.5, '#0e1233', '#2b2a5c'], [24, '#070b1f', '#141a3d'],
+    ] as [number, string, string][]).map(([h, a, b]) => [h, hex(a), hex(b)]);
+    const skyAt = (h: number): [RGB, RGB] => {
+      let i = 0;
+      while (i < KEYS.length - 2 && h >= KEYS[i + 1][0]) i++;
+      const [h0, a0, b0] = KEYS[i], [h1, a1, b1] = KEYS[i + 1];
+      const t = clamp((h - h0) / (h1 - h0));
+      return [mix(a0, a1, t), mix(b0, b1, t)];
+    };
+
+    // A tiny seeded random, so the stars and buildings are the same on every visit.
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    const stars = Array.from({ length: 46 }, () => [Math.floor(rnd() * W), Math.floor(rnd() * 24), rnd() * 6.28] as const);
+    const blocks: { x: number; w: number; h: number; win: [number, number][] }[] = [];
+    for (let x = 0; x < W; ) {
+      const w = 3 + Math.floor(rnd() * 5), h = 2 + Math.floor(rnd() * 6);
+      const win: [number, number][] = [];
+      for (let k = 0; k < 3; k++) win.push([Math.floor(rnd() * w), Math.floor(rnd() * h)]);
+      blocks.push({ x, w, h, win });
+      x += w;
+    }
+    const clouds = [[20, 6, 11], [84, 4, 8], [140, 9, 13]];
+
+    const kolkataHour = () => {
+      const p = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+      const get = (t: string) => Number(p.find((x) => x.type === t)?.value ?? 0);
+      return get('hour') + get('minute') / 60;
+    };
+    const label = (h: number) => {
+      const hh = Math.floor(h) % 24, mm = Math.floor((h % 1) * 60);
+      return `${hh % 12 || 12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'am' : 'pm'}`;
+    };
+
+    let skip = 0;   // hours skipped ahead by clicking
+    let shown = 0;  // the same, eased
+    const ripples: { x: number; t: number }[] = [];
+
+    const px = (x: number, y: number, w = 1, h = 1) => ctx.fillRect(Math.round(x), Math.round(y), w, h);
+    const line = (x0: number, y0: number, x1: number, y1: number) => {
+      const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1;
+      for (let i = 0; i <= n; i++) px(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n);
+    };
+    // Top chord of the bridge: up the anchor arm, a dip between the towers, down again.
+    const DECK = 29, TOP = 9, A = 22, T1 = 58, T2 = 122, B = 158;
+    const chord = (x: number) =>
+      x < T1 ? DECK - ((x - A) / (T1 - A)) * (DECK - TOP)
+      : x <= T2 ? TOP + Math.sin((Math.PI * (x - T1)) / (T2 - T1)) * 8
+      : TOP + ((x - T2) / (B - T2)) * (DECK - TOP);
+
+    function draw(now: number) {
+      const sec = now / 1000;
+      shown += (skip - shown) * 0.12;
+      if (Math.abs(skip - shown) < 0.01) shown = skip;
+      const h = (((kolkataHour() + shown) % 24) + 24) % 24;
+      const night = clamp((Math.abs(h - 12) - 5.6) / 1.4);
+      const [top, hor] = skyAt(h);
+
+      for (let y = 0; y < HZ; y++) { ctx.fillStyle = css(mix(top, hor, (y / (HZ - 1)) ** 1.4)); ctx.fillRect(0, y, W, 1); }
+
+      if (night > 0.15) for (const [sx, sy, ph] of stars) { ctx.fillStyle = css([255, 250, 235], night * (0.35 + 0.65 * Math.abs(Math.sin(sec * 0.8 + ph)))); px(sx, sy); }
+
+      // Sun by day, moon by night, both on the same arc.
+      const day = h >= 6 && h < 18;
+      const p = day ? (h - 6) / 12 : ((h + 6) % 24) / 12;
+      const bx = 14 + 152 * p, by = HZ - 3 - Math.sin(Math.PI * p) * 26;
+      if (day) {
+        ctx.fillStyle = css(mix([255, 150, 70], [255, 222, 120], Math.sin(Math.PI * p)));
+        px(bx - 1, by - 2, 3, 5); px(bx - 2, by - 1, 5, 3);
+      } else {
+        ctx.fillStyle = css([236, 233, 220]); px(bx - 1, by - 2, 3, 5); px(bx - 2, by - 1, 5, 3);
+        ctx.fillStyle = css([190, 188, 178]); px(bx, by - 1); px(bx - 1, by + 1); // craters
+      }
+
+      if (night < 0.8) {
+        ctx.fillStyle = css([255, 255, 255], (1 - night) * 0.75);
+        for (const [cx, cy, cw] of clouds) { const x = (cx + sec * 0.9) % (W + 20) - 10; px(x, cy, cw, 2); px(x + 2, cy - 1, cw - 5, 1); px(x + 1, cy + 2, cw - 3, 1); }
+      }
+
+      // The city on both banks, lit at night.
+      const far = mix(hor, [22, 22, 40], 0.45 + 0.4 * night);
+      for (const b of blocks) {
+        ctx.fillStyle = css(far); ctx.fillRect(b.x, HZ - b.h, b.w, b.h);
+        if (night > 0.45) { ctx.fillStyle = css([255, 214, 120], night * 0.9); for (const [wx, wy] of b.win) if ((wx + wy + b.x) % 3) px(b.x + wx, HZ - b.h + wy + 1); }
+      }
+
+      // Howrah Bridge.
+      const steel = mix([78, 88, 104], [16, 19, 32], night * 0.85);
+      ctx.fillStyle = css(steel, 0.4);
+      for (let x = A; x < B; x += 4) line(x, chord(x), x + 4, DECK);           // truss diagonals
+      ctx.fillStyle = css(steel);
+      for (let x = A; x <= B; x++) px(x, chord(x));                             // top chord
+      for (let x = A + 4; x < B; x += 4) line(x, chord(x), x, DECK);            // hangers
+      ctx.fillRect(4, DECK, W - 8, 2);                                          // deck
+      ctx.fillRect(T1 - 1, TOP - 1, 3, HZ - TOP + 3); ctx.fillRect(T2 - 1, TOP - 1, 3, HZ - TOP + 3); // towers
+      ctx.fillRect(T1 - 2, DECK + 2, 5, HZ - DECK); ctx.fillRect(T2 - 2, DECK + 2, 5, HZ - DECK);     // piers
+      if (night > 0.4) {
+        ctx.fillStyle = css([255, 214, 120], night);
+        for (let x = 8; x < W - 6; x += 6) px(x, DECK - 1);
+        ctx.fillStyle = css([255, 80, 70], night * (Math.sin(sec * 3) > 0 ? 1 : 0.25)); px(T1, TOP - 2); px(T2, TOP - 2);
+      }
+
+      // A yellow taxi one way, a blue bus the other.
+      const taxi = (sec * 7) % (W + 10) - 5, bus = W + 5 - ((sec * 4.5) % (W + 12));
+      ctx.fillStyle = '#f5c518'; px(taxi, DECK - 2, 3, 2); ctx.fillStyle = '#1b1b1b'; px(taxi + 1, DECK - 2, 1, 1);
+      ctx.fillStyle = '#3f7fd9'; px(bus, DECK - 2, 5, 2); ctx.fillStyle = css([220, 235, 255]); px(bus + 1, DECK - 2, 3, 1);
+
+      // The Hooghly: the sky, darker, with moving glints.
+      for (let y = HZ; y < H; y++) {
+        const d = (y - HZ) / (H - HZ);
+        ctx.fillStyle = css(mix(mix(hor, [10, 36, 58], 0.5 + 0.2 * night), [6, 16, 30], d * 0.6)); ctx.fillRect(0, y, W, 1);
+      }
+      ctx.fillStyle = css(mix(hor, [255, 255, 255], 0.35), 0.35);
+      for (let y = HZ + 1; y < H; y += 2) for (let k = 0; k < 5; k++) {
+        const x = (k * 41 + y * 13 + Math.sin(sec * 0.7 + y) * 6 + sec * (y % 4 === 0 ? 2 : -1.5)) % W;
+        px((x + W) % W, y, 3 + (y % 3), 1);
+      }
+      ctx.fillStyle = css(day ? [255, 214, 130] : [236, 233, 220], 0.5);     // light on the water
+      for (let y = HZ + 1; y < H; y += 2) px(bx - 2 + Math.sin(sec * 2 + y) * 1.5, y, 4, 1);
+      ctx.fillStyle = css(steel, 0.35);                                        // the towers, reflected
+      for (let y = HZ + 1; y < HZ + 9; y += 2) { px(T1 - 1 + Math.sin(sec + y), y, 3, 1); px(T2 - 1 + Math.sin(sec + y), y, 3, 1); }
+
+      // Ripples where the cursor touched the water.
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const r = ripples[i], age = sec - r.t;
+        if (age > 1.6) { ripples.splice(i, 1); continue; }
+        ctx.fillStyle = css([255, 255, 255], 0.55 * (1 - age / 1.6));
+        const rad = age * 9; px(r.x - rad, HZ + 6, 2, 1); px(r.x + rad, HZ + 6, 2, 1); px(r.x - rad * 0.6, HZ + 10, 2, 1); px(r.x + rad * 0.6, HZ + 10, 2, 1);
+      }
+
+      // A nouka drifting downstream.
+      const nx = (sec * 2.2) % (W + 24) - 12, ny = HZ + 7 + Math.round(Math.sin(sec * 1.4));
+      ctx.fillStyle = '#3a2a1c'; px(nx, ny, 11, 1); px(nx + 1, ny + 1, 9, 1); px(nx - 1, ny - 1, 2, 1); px(nx + 10, ny - 1, 2, 1);
+      ctx.fillStyle = '#c9b48a'; px(nx + 3, ny - 2, 5, 2);
+      ctx.fillStyle = '#e8e2d0'; px(nx + 8, ny - 3, 1, 3);
+
+      chip.textContent = skip ? `+${skip}h · ${label(h)} · back to now` : `kolkata · ${label(h)}`;
+    }
+
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let visible = true, last = 0;
+    const loop = (t: number) => {
+      if (visible && t - last > 80) { last = t; draw(t); } // about 12 frames a second suits pixel art
+      requestAnimationFrame(loop);
+    };
+    draw(performance.now());
+    if (!still) {
+      new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(root);
+      requestAnimationFrame(loop);
+    }
+
+    cv.addEventListener('click', () => { skip = (skip + 3) % 24; play('toggle'); if (still) { shown = skip; draw(performance.now()); } });
+    chip.addEventListener('click', () => { if (!skip) return; skip = 0; play('tap'); if (still) { shown = 0; draw(performance.now()); } });
+    let lastRipple = 0;
+    cv.addEventListener('pointermove', (e) => {
+      const r = cv.getBoundingClientRect();
+      const y = ((e.clientY - r.top) / r.height) * H, t = performance.now();
+      if (y > HZ && t - lastRipple > 140) { lastRipple = t; ripples.push({ x: ((e.clientX - r.left) / r.width) * W, t: t / 1000 }); }
+    });
+  }
+</script>
+
+<style>
+  .sky { position: relative; line-height: 0; overflow: hidden; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 18 / 5; image-rendering: pixelated; cursor: pointer; background: #141a3d; }
+  .chip {
+    position: absolute; right: 10px; bottom: 10px; line-height: 1.4; padding: 3px 9px; border: 0; border-radius: 6px; cursor: pointer;
+    font-size: 0.6875rem; color: #fff; background: rgb(0 0 0 / 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  /* Phones: keep the picture tall by cropping the two ends of the bridge. */
+  @media (max-width: 760px) { canvas { width: 140%; margin-left: -20%; } }
+</style>

@@ -11,6 +11,7 @@ const year = new Date().getFullYear();
     <li><a class="mono" href="/llms.txt">llms.txt</a></li>
   </ul>
   <p class="mono hint">press <kbd>⌘</kbd> <kbd>K</kbd> to jump anywhere</p>
+  <p class="mono hint">psst, this is a backend dev's site. press <kbd>D</kbd> to deploy</p>
 </footer>
 
 <script>
@@ -27,6 +28,29 @@ const year = new Date().getFullYear();
   }
   greet();
   document.addEventListener('astro:page-load', greet);
+
+  // Press D: a pretend deploy runs in the corner. Nothing is deployed.
+  import { play } from '../lib/sound';
+  let busy = false;
+  document.addEventListener('keydown', (e) => {
+    const t = e.target as HTMLElement | null;
+    if (busy || e.key.toLowerCase() !== 'd' || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    if (t && (t.closest('input, textarea, select, [contenteditable], [role="dialog"]'))) return;
+    busy = true;
+    const friday = new Date().getDay() === 5;
+    const lines = ['$ git push origin main', '✓ lint   ✓ types   ✓ tests', '✓ migrations applied', friday ? '✓ deployed to prod. on a friday. bold.' : '✓ deployed to prod', 'nothing broke. back to work.'];
+    const box = document.createElement('div');
+    box.className = 'deploy mono'; box.setAttribute('role', 'status');
+    document.body.appendChild(box);
+    play('open');
+    lines.forEach((l, i) => setTimeout(() => {
+      const p = document.createElement('p'); p.textContent = l; if (l.startsWith('✓')) p.className = 'ok';
+      box.appendChild(p);
+      play(i === lines.length - 2 ? 'win' : 'tap');
+    }, 150 + i * 520));
+    setTimeout(() => box.classList.add('out'), 150 + lines.length * 520 + 1800);
+    setTimeout(() => { box.remove(); busy = false; }, 150 + lines.length * 520 + 2200);
+  });
 </script>
 
 <style>
@@ -38,4 +62,14 @@ const year = new Date().getFullYear();
   a:hover { color: var(--ink); }
   kbd { font-family: var(--font-mono); font-size: 0.6875rem; border: 1px solid var(--rule-strong); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
   @media (hover: none) { .hint { display: none; } }
+  :global(.deploy) {
+    position: fixed; left: 20px; bottom: 20px; z-index: 80; min-width: 300px; padding: 14px 16px; border-radius: 12px;
+    background: #0d0d0c; color: #e9e7df; border: 1px solid #33332f; box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.7);
+    font-size: 0.75rem; line-height: 1.7; animation: deploy-in 0.3s cubic-bezier(0.34, 1.4, 0.64, 1); transition: opacity 0.3s, transform 0.3s;
+  }
+  :global(.deploy p) { margin: 0; white-space: pre; animation: deploy-line 0.2s ease-out; }
+  :global(.deploy .ok) { color: #3ecf7a; }
+  :global(.deploy.out) { opacity: 0; transform: translateY(8px); }
+  @keyframes deploy-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
+  @keyframes deploy-line { from { opacity: 0; transform: translateX(-4px); } }
 </style>
