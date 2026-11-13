@@ -38,7 +38,7 @@ const P = Object.fromEntries(work.map((w) => [w.id, {
 const hash = (id: string) => { let h = 2166136261; for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0).toString(16).padStart(8, '0').slice(0, 7); };
 // Git decoration for the projects log: refs beside the title, and which commits sit on a side branch.
 // Latest release tag of each project, read from its repository on 12 Nov 2026. Migrata and Remote Tooling have no tags.
-const tags: Record<string, string> = { 'selegic-crm': 'crm-v1.0.0-alpha.6', 'selegic-internal': 'v1.6.0', 'doc-gen': 'v1.0.0-beta.9', 'switch-to-classic': 'v1.4', 'attenta-ios': '1.0.6.9' };
+const tags: Record<string, string> = { 'selegic-crm': 'crm-v1.0.0-alpha.7', 'selegic-internal': 'v1.6.0', 'doc-gen': 'v1.0.0-beta.9', 'switch-to-classic': 'v1.4', 'attenta-ios': '1.0.6.9' };
 const sideBranch = new Set(['selegic-internal', 'doc-gen', 'attenta-ios']);
 const social = links.filter((l) => l.brand);
 const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));

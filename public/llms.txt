@@ -15,8 +15,8 @@ Riju Dev Purkayastha (he/him). Location: Kolkata, India. Open to on-site, hybrid
 - [Selegic CRM](https://rijudevx.github.io/work/selegic-crm/): A multi-tenant CRM platform. I designed it, built v1 on my own and now lead the team that builds it.
 - [Migrata](https://rijudevx.github.io/work/migrata/): Automated multi-org Salesforce data migration that replaced manual CPQ deployments with a repeatable, validated pipeline.
 - [Selegic Internal](https://rijudevx.github.io/work/selegic-internal/): The company's time-tracking and project platform, built end to end.
-- [Doc Gen](https://rijudevx.github.io/work/doc-gen/): A service that turns templates into DOCX and PDF documents. I worked on its infrastructure, deployment and CPQ terms rendering.
-- [AttentaFit & Attenta Yoga](https://rijudevx.github.io/work/attenta-ios/): Native iOS fitness and wellness apps. I was the top contributor on AttentaFit and worked on Attenta Yoga.
+- [Doc Gen](https://rijudevx.github.io/work/doc-gen/): Turns Salesforce records into DOCX and PDF from templates, via a web editor, a public API or a Salesforce quick action. I built it, including the Python and LibreOffice rendering service; with my team, PDF generation went from 12–13 s to about 1–2 s.
+- [AttentaFit & Attenta Yoga](https://rijudevx.github.io/work/attenta-ios/): Native iOS fitness and wellness apps. I built most of AttentaFit's features in SwiftUI, and booking, players and sharing in Attenta Yoga, shipping builds 1.0.5 to 1.0.7.
 - [Switch to Classic](https://rijudevx.github.io/work/switch-to-classic/): A Chrome extension that switches Salesforce between Lightning and Classic. I built it as an intern and maintained it for three years.
 - [Remote Tooling](https://rijudevx.github.io/work/remote-tooling/): Tools for managing Salesforce field-level security and permission sets: Angular front ends and Node.js services.
 

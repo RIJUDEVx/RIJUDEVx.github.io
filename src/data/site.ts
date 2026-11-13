@@ -94,13 +94,13 @@ export const experience = {
   // The long version walks the whole five years, oldest first. Facts and dates from profile/career-facts.md.
   long: [
     { when: '2022', text: 'Joined as an intern. Built Switch to Classic, a Chrome extension for Salesforce that I then maintained for three years, and Remote Tooling: Angular front ends and Node.js services for field-level security and permission sets.' },
-    { when: '2022 – 2023', text: 'Moved to native iOS. Calendar, booking and players on Attenta Yoga, then the top contributor on AttentaFit: onboarding, workouts, diet plans, subscriptions, HealthKit and a custom video player.' },
+    { when: '2022 – 2024', text: 'Moved to native iOS. On Attenta Yoga: session booking with payments, audio and video players with a mini player and lock-screen controls, a sound mixer and share links, and App Store builds 1.0.5 to 1.0.7. On AttentaFit, in SwiftUI: onboarding, workouts with a custom video player, diet plans and meal logging, trainer booking, chat and subscriptions.' },
     { when: '2023 – 2024', text: 'Salesforce development in Apex and LWC, with GitHub Actions deploying to orgs.' },
     { when: 'Alongside', text: 'Built Migrata, an automated multi-org Salesforce data migration pipeline in Node.js that replaced manual CPQ deployments. It is on AppExchange.' },
     { when: '2024 – 2025', text: 'Started Selegic CRM alone from an empty repository and shipped 1.0.0 in five months. Then rebuilt it as one TypeScript codebase on Cloudflare Workers and PostgreSQL.' },
     { when: '2025 – 2026', text: 'Built Selegic Internal end to end: the time-tracking and project platform the company uses every day, with sign-in, three role tiers and emailed reports.' },
-    { when: '2026', text: 'Opened the CRM to outside developers with a public extension SDK and CLI.' },
-    { when: 'Now', text: 'Lead the Selegic CRM team: set architecture and priorities, review code and mentor engineers. Set up how the team ships: a preview of every change, tests that gate each release, staged rollouts. 236 changes shipped this way since Jul 2026. New customer workspaces are ready about 3× faster, from a pool of pre-warmed tenant schemas.' },
+    { when: '2026', text: 'Built Doc Gen, which turns Salesforce records into DOCX and PDF from a web editor, a public API or a button in Salesforce, with rendering in a Python and LibreOffice container. Opened the CRM to outside developers with a public extension SDK and CLI.' },
+    { when: 'Now', text: 'Lead the Selegic CRM team: set architecture and priorities, review code and mentor engineers. Set up how the team ships: a preview of every change, tests that gate each release, staged rollouts. 236 changes shipped this way since Jul 2026. Cut CRM server response time from 2–7 seconds to under 0.3, and new workspace setup from about 48 seconds to 2–4.' },
   ],
 };
 

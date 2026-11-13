@@ -11,8 +11,10 @@ stack: ["TypeScript", "Node.js", "Hono", "PostgreSQL", "Cloudflare Workers", "Ta
 stats:
   - value: "5 months"
     label: "to v1.0.0, solo"
-  - value: "~3×"
-    label: "faster workspace setup"
+  - value: "2–7 s → <0.3 s"
+    label: "server response time"
+  - value: "~48 s → ~2–4 s"
+    label: "new workspace setup"
   - value: "236"
     label: "changes shipped since Jul 2026"
   - value: "323/483"
@@ -41,13 +43,17 @@ I also set up the cloud infrastructure: Google Cloud, AWS (S3 and routing) and C
 
 ### 1. Pre-warmed workspaces
 
-A new customer workspace has to be ready quickly. I keep a pool of pre-warmed tenant schemas, so a workspace can be handed out without waiting for setup. Workspace setup is now about 3× faster.
+A new customer workspace has to be ready quickly. I keep a pool of pre-warmed tenant schemas, run by durable Cloudflare Workflows, so a workspace can be handed out without waiting for setup. A new workspace went from about 48 seconds to 2–4 seconds, and later work cut its setup queries from 55 to 10.
 
-### 2. Formulas on every write
+### 2. Making it fast
+
+The backend used to be a separate server. I merged it into one Cloudflare Worker with the web app, cached schema metadata per instance and removed an auth check that cost about 400 ms on every request. On the cloud stage, time to first byte went from 2–7 seconds to under 0.3 seconds. The browser's entry bundle went from 1.56 MB to 209 kB, with a build check that keeps it there, and notifications moved from polling to server-sent events, cutting their database load by about 83%.
+
+### 3. Formulas on every write
 
 Formulas run on every write, so they have to be safe to run and cheap to keep up to date. Rules run in a sandbox, and recalculation is batched.
 
-### 3. Releases nobody has to hold their breath for
+### 4. Releases nobody has to hold their breath for
 
 Deploys are stage-aware. Every pull request gets its own preview environment, releases are driven by tags, and the end-to-end tests gate each release. Secrets are kept in the Cloudflare Secrets Store.
 
