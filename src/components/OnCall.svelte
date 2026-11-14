@@ -154,7 +154,7 @@
   .pager { margin: 0; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 0.6875rem; color: var(--text); min-height: 2.9em; display: flex; gap: 8px; align-items: baseline; }
   .bell { color: var(--warn); }
 
-  .veil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 20px; text-align: center; background: color-mix(in oklab, var(--surface) 86%, transparent); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+  .veil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 20px; text-align: center; background: color-mix(in oklab, var(--surface) 86%, transparent); backdrop-filter: blur(3px); }
   .score { margin: 0; font-size: 3rem; font-weight: 600; letter-spacing: -0.05em; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
   .score span { font-size: 0.875rem; font-weight: 500; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
   .sub { margin: 0; max-width: 40ch; font-size: 0.875rem; line-height: 1.5; color: var(--text); }

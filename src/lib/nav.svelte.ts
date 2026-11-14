@@ -1,5 +1,5 @@
 // Shared behaviour for every nav variant: the links, which section is on screen,
-// scroll direction, and a "fluid hover" highlight that glides between items
+// and a "fluid hover" highlight that glides between items
 // (after Fluid Functionalism: one highlight per list, springs not durations,
 // a fresh pointer entry fades in where it lands instead of sliding across).
 import { Spring } from 'svelte/motion';
@@ -24,7 +24,7 @@ const sectionLabel: Record<string, string> = {
 export const reducedMotion = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Which home section is in view, how far down the page we are, and scroll direction. */
+/** Which home section is in view and how far down the page we are. */
 export function createPageState() {
   const state = $state({
     path: '/',
@@ -32,24 +32,21 @@ export function createPageState() {
     label: 'Home',
     progress: 0,
     scrolled: false,
-    hidden: false, // true while scrolling down past the fold
   });
 
-  let lastY = 0;
-  let io: IntersectionObserver | null = null;
+  let pickSection: (() => void) | null = null;
+  let raf = 0;
 
   function onScroll() {
     const y = window.scrollY;
     const max = document.documentElement.scrollHeight - innerHeight;
     state.progress = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
     state.scrolled = y > 8;
-    const delta = y - lastY;
-    if (Math.abs(delta) > 6) state.hidden = delta > 0 && y > 320;
-    lastY = y;
+    if (pickSection && !raf) raf = requestAnimationFrame(() => { raf = 0; pickSection?.(); });
   }
 
   function watchSections() {
-    io?.disconnect();
+    pickSection = null;
     state.path = location.pathname;
     if (state.path !== '/') {
       state.active = '';
@@ -58,27 +55,20 @@ export function createPageState() {
     }
     state.active = 'top';
     state.label = 'Home';
-    const visible = new Map<string, number>();
-    io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
-        // The section nearest the top band wins.
-        let best = 'top', bestTop = Infinity;
-        for (const [id, ratio] of visible) {
-          if (!ratio) continue;
-          const top = Math.abs(document.getElementById(id)!.getBoundingClientRect().top);
-          if (top < bestTop) { bestTop = top; best = id; }
-        }
-        state.active = best;
-        state.label = sectionLabel[best] ?? 'Home';
-      },
-      { rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.01, 0.5] },
-    );
-    document.querySelectorAll('main section[id]').forEach((s) => io!.observe(s));
+    const list = [...document.querySelectorAll<HTMLElement>('main section[id]')];
+    // The current section is the last one whose top has passed 45% of the screen. Sections
+    // without an id (the backlog at the bottom) keep the one above them current.
+    const pick = () => {
+      let best = 'top';
+      for (const s of list) if (s.getBoundingClientRect().top <= innerHeight * 0.45) best = s.id;
+      state.active = best;
+      state.label = sectionLabel[best] ?? 'Home';
+    };
+    pickSection = pick;
+    pick();
   }
 
   function start() {
-    lastY = window.scrollY;
     onScroll();
     watchSections();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -86,7 +76,7 @@ export function createPageState() {
     return () => {
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('astro:page-load', watchSections);
-      io?.disconnect();
+      cancelAnimationFrame(raf);
     };
   }
 

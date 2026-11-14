@@ -22,6 +22,8 @@ const { Content } = await render(entry);
 <style>
   .post { padding: 104px var(--gutter) 64px; display: grid; gap: 14px; justify-items: start; }
   .back { color: var(--muted); text-decoration: none; }
+  /* Phones have a back button in the navigation bar. */
+  @media (max-width: 760px) { .back { display: none; } }
   h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 600; letter-spacing: -0.035em; line-height: 1.12; }
   .lede { margin: 0; color: var(--text); font-size: 1.0625rem; }
   .body { width: 100%; padding-top: 12px; border-top: 1px solid var(--rule); color: var(--text); line-height: 1.75; }

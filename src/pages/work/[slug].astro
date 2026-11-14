@@ -58,6 +58,8 @@ const s = statusLabel[d.status];
   .back { margin-top: 20px; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; }
   .back :global(svg) { width: 14px; height: 14px; }
   .back:hover { color: var(--ink); }
+  /* Phones have a back button in the navigation bar. */
+  @media (max-width: 760px) { .back { display: none; } }
   h1 { margin: 8px 0 0; font-family: var(--font-sans); font-size: 2.25rem; font-weight: 500; letter-spacing: -0.025em; line-height: 1.25; color: var(--ink); }
   .summary { margin: 0; font-size: 0.9375rem; color: var(--text); max-width: 46ch; line-height: 1.6; }
   .meta { display: flex; gap: 24px; margin: 0; font-size: 0.75rem; }
