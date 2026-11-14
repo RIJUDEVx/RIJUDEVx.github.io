@@ -7,6 +7,7 @@ import SmoothScroll from '../components/SmoothScroll.svelte';
 import CommandPalette from '../components/CommandPalette.svelte';
 import Seo from '../components/Seo.astro';
 import { profile } from '../data/site';
+import { getCollection } from 'astro:content';
 import type { FaqItem, VideoMeta, WorkMeta } from '../lib/types';
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
 }
 const { title, description = `${profile.name}, ${profile.title}. ${profile.tagline}`, page = 'home', faq, work, video, noindex = false } = Astro.props;
 // Browser title is just the GitHub handle (Riju's call, 13 Nov 2026). The full name stays in og/meta/JSON-LD.
+// Case studies for the search palette, in the same order as the projects log.
+const cases = (await getCollection('work')).sort((x, y) => x.data.order - y.data.order).map((w) => ({ id: w.id, title: w.data.title }));
 const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
 ---
 <!doctype html>
@@ -106,7 +109,7 @@ const fullTitle = title ? `${title} · ${profile.handle}` : profile.handle;
     </div>
     <Cursor client:only="svelte" />
     <SmoothScroll client:only="svelte" />
-    <CommandPalette client:idle />
+    <CommandPalette client:idle cases={cases} />
     <script>
       import { play, type SoundName } from '../lib/sound';
       import { toast, copiedLine } from '../lib/toast';
