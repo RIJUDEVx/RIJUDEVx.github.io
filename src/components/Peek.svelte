@@ -76,6 +76,7 @@
   .dot[data-tone='ok'] { background: var(--ok); } .dot[data-tone='pilot'] { background: var(--accent); }
 
   .card {
+    white-space: normal;
     position: absolute; bottom: calc(100% + 10px); z-index: 60; width: 300px; display: grid; gap: 8px;
     padding: 14px 16px 12px; border-radius: 16px; background: var(--surface);
     box-shadow: 0 0 0 1px var(--rule-strong), 0 24px 60px -24px rgb(0 0 0 / 0.55);

@@ -61,7 +61,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
       <span class="ln">Salesforce tooling and native apps,</span>{' '}
       <em class="ln">and lead the team behind Selegic CRM.</em>
     </h1>
-    <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> · ~5 years · {work.length} projects</p>
+    <p class="sub">{profile.title} at <a href={profile.company.url} target="_blank" rel="noopener">Selegic India</a> <span class="nw">· ~5 years</span> <span class="nw">· {work.length} projects</span></p>
     <div class="cta">
       <CopyEmail client:load email={profile.email} big />
       <a class="pill" href="/resume.pdf" data-sound="tap"><Icon name="file" />Resume</a>
@@ -76,7 +76,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     <div class="body about">
       <div class="story">
         <p class="tagline">{profile.tagline}</p>
-        <p class="lede">I started at Selegic as an intern in January 2022, building a Chrome extension (<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>) and Salesforce admin tools. Since then I've worked on native iOS apps (<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>), built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
+        <p class="lede">I started at Selegic as an intern in January 2022, building a Chrome extension <span class="nw">(<Peek client:visible {...P['switch-to-classic']}>Switch to Classic</Peek>)</span> and Salesforce admin tools. Since then I've worked on native iOS apps <span class="nw">(<Peek client:visible {...P['attenta-ios']}>Attenta</Peek>),</span> built{' '}<Peek client:visible {...P['migrata']}>Migrata</Peek> for Salesforce AppExchange and the company's{' '}<Peek client:visible {...P['selegic-internal']}>time-tracking platform</Peek>, and designed{' '}<Peek client:visible {...P['selegic-crm']}>Selegic CRM</Peek>, which I now lead.</p>
       </div>
     </div>
   </section>
@@ -339,6 +339,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
 
   /* About: the one-liner, then the paragraph with its project peeks. */
   .tagline { margin: 0 0 20px; max-width: 24ch; font-size: 2rem; font-weight: 600; letter-spacing: -0.035em; line-height: 1.15; color: var(--ink); }
+  .nw { white-space: nowrap; }
   .lede { margin: 0; max-width: 62ch; font-size: 1.125rem; line-height: 1.75; color: var(--text); }
 
   .card-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
@@ -382,8 +383,9 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .diff { display: grid; gap: 12px; }
   .diff > :first-child { margin-top: 2px; } .diff > :last-child { margin-bottom: 22px; }
   .diff .cs { margin: 0; max-width: 60ch; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
-  .plus { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; display: grid; gap: 2px; font-size: 0.75rem; color: var(--text); background: color-mix(in oklab, var(--ok) 7%, transparent); border-left: 2px solid var(--ok); }
-  .plus b { color: var(--ok); font-weight: 500; margin-right: 6px; }
+  .plus { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; font-size: 0.75rem; color: var(--text); background: color-mix(in oklab, var(--ok) 7%, transparent); border-left: 2px solid var(--ok); }
+  .plus li { display: contents; }
+  .plus b { color: var(--ok); font-weight: 500; white-space: nowrap; }
   .go { flex: none; font-size: 0.75rem; color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
   .go:hover { text-decoration-color: currentColor; }
   .root { position: relative; margin: 0; padding: 14px 0 0; font-size: 0.6875rem; color: var(--muted); }
@@ -398,7 +400,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
   @media (hover: none) { .keys { display: none; } }
 
-  #ask :global(h2), #ask :global(h2 + p) { display: none; }
+  #ask .body :global(h2), #ask .body :global(h2 + p) { display: none; }
   #stack :global(.top .k) { letter-spacing: 0.12em; font-weight: 500; }
 
   .contact { display: grid; gap: 4px; }
@@ -412,7 +414,7 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .identity { flex-direction: column; align-items: flex-start; gap: 14px; margin-top: -44px; }
     .avatar { width: 104px; height: 104px; border-radius: 22px; }
     /* The clock fills in after load; give it its own line from the start so nothing below moves. */
-    .when { flex-basis: 100%; }
+    .eyebrow .when { flex-basis: 100%; }
     .dt { display: none; }
     h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.035em; margin-top: 18px; }
     .sub { color: var(--muted); }
@@ -422,7 +424,13 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .head { padding: 24px var(--gutter) 16px; }
     .head h2 { font-size: 1.875rem; }
     .side { display: none; }
-    .commit .when { margin-left: 0; flex-basis: 100%; }
+    .row { gap: 6px 10px; }
+    .hash { order: 0; } .ttl { order: 1; flex: 1 1 0; min-width: 0; }
+    .chev { order: 2; align-self: center; margin: 0 6px 3px 0; }
+    .commit.open .chev { margin-bottom: -3px; }
+    .row::after { content: ''; order: 3; flex-basis: 100%; height: 0; }
+    .ref, .commit .badge { order: 4; }
+    .commit .when { order: 5; margin-left: 0; flex-basis: 100%; }
     .body { padding: 26px var(--gutter) 52px; }
     .log { padding-left: 40px; } .node { left: -40px; } .commit.branch::before { left: -33.5px; } .commit.branch .node { left: -22px; } .root .node { left: -38px; }
     .tagline { font-size: 1.5rem; }

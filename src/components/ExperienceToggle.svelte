@@ -138,6 +138,7 @@
   .yr { font-size: 0.6875rem; color: var(--muted); text-align: right; padding-top: 4px; white-space: nowrap; }
   .now .yr { color: var(--accent); }
   @media (max-width: 760px) {
+    .seg { margin-left: 0; flex-basis: 100%; margin: 4px 0 8px; }
     .long li { grid-template-columns: 1fr; padding-left: 22px; gap: 2px; }
     .long li::before, .long li::after { left: 4px; }
     .yr { text-align: left; padding-top: 0; }
