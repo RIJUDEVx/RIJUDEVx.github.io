@@ -1,7 +1,14 @@
 // One small toast for everything that gets copied, whether by a button or by
 // selecting text. The line depends on what was copied.
 
+let last = { text: '', at: 0 };
+
 export function toast(text: string) {
+  // One copy can fire more than one event (a button click plus the native copy event on
+  // touch screens). Same line within a moment: show it once.
+  const now = performance.now();
+  if (text === last.text && now - last.at < 1500) return;
+  last = { text, at: now };
   document.querySelector('.toast')?.remove();
   const t = document.createElement('div');
   t.className = 'toast mono';
