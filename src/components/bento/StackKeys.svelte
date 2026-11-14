@@ -1,6 +1,6 @@
 <script lang="ts">
   // The stack as a keyboard: every tool is a keycap with its logo. Hover lifts a key
-  // and shows its name on a small LCD readout; clicking presses it with a click.
+  // (its name is in the tooltip); clicking presses it with a click.
   // Typing a letter while the tile is hovered presses the matching key.
   import { play } from '../../lib/sound';
   // Logos ship in this island's own JS chunk (cached, compressed) instead of the page HTML.
@@ -34,7 +34,6 @@
 <div class="keys" onpointerenter={() => (over = true)} onpointerleave={() => { over = false; lit = null; }}>
   <div class="top">
     <span class="k mono">Stack</span>
-    <span class="lcd mono" aria-live="polite">{#if lit !== null}{items[lit].label}{:else}<span class="fine">hover a key · or type</span><span class="coarse">tap a key</span>{/if}</span>
   </div>
   <div class="board">
     {#each items as it, i (it.label)}
@@ -49,15 +48,8 @@
 
 <style>
   .keys { display: flex; flex-direction: column; gap: 12px; height: 100%; }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .top { display: flex; align-items: center; }
   .k { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-  .coarse { display: none; }
-  @media (hover: none) { .fine { display: none; } .coarse { display: inline; } }
-  .lcd {
-    font-size: 0.6875rem; padding: 3px 9px; border-radius: 6px; min-width: 9rem; text-align: right;
-    background: color-mix(in oklab, var(--paper) 80%, #000); color: var(--ok);
-    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.4); letter-spacing: 0.04em;
-  }
   .board { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 8px; }
   @media (max-width: 760px) { .board { grid-template-columns: repeat(7, minmax(0, 1fr)); } }
   .key {

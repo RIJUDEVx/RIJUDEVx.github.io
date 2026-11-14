@@ -104,7 +104,10 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
                 <p class="meta mono"><span>commit {hash(w.id)}</span><span>role: {w.data.role}</span>{/\d{4}/.test(w.data.years) && <span>date: {w.data.years}</span>}</p>
                 <p class="cs">{w.data.summary}</p>
                 {w.data.stats.length > 0 && (
-                  <ul class="plus mono">{w.data.stats.slice(0, 3).map((s) => <li><b>+ {s.value}</b> {s.label}</li>)}</ul>
+                  <div class="plus mono">
+                    <p class="hunk">@@ -0,0 +1,{Math.min(3, w.data.stats.length)} @@ <span>results</span></p>
+                    <ul>{w.data.stats.slice(0, 3).map((s) => <li><span class="sg" aria-hidden="true">+</span><b>{s.value}</b><span class="lb">{s.label}</span></li>)}</ul>
+                  </div>
                 )}
                 <div class="card-foot">
                   <ul class="tags">{w.data.stack.slice(0, 6).map((t) => <li class="mono">{t}</li>)}</ul>
@@ -224,17 +227,6 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
         row.parentElement!.classList.toggle('open', open);
         (row.nextElementSibling as HTMLElement).inert = !open;
       };
-      // The log is always as tall as it would be with its tallest commit open. Without this,
-      // closing a tall commit shortens the page, and near the bottom the browser has nowhere
-      // to scroll to, so everything lurches.
-      const reserve = () => {
-        const closed = rows.reduce((n, r) => n + r.offsetHeight + 1, 0) + (log.querySelector<HTMLElement>('.root')?.offsetHeight ?? 0);
-        const tallest = Math.max(...rows.map((r) => (r.nextElementSibling!.firstElementChild as HTMLElement).scrollHeight));
-        log.style.minHeight = `${closed + tallest + 8}px`;
-      };
-      reserve();
-      addEventListener('resize', reserve);
-      document.fonts?.ready.then(reserve);
       for (const row of rows) row.addEventListener('click', () => {
         const opening = row.getAttribute('aria-expanded') !== 'true';
         const top = row.getBoundingClientRect().top;
@@ -358,7 +350,6 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
 
   /* Projects as a commit history: a line down the left, one node per project, the diff opens underneath. */
   .log { position: relative; padding-left: 46px; display: flex; flex-direction: column; }
-  .log .root { margin-top: auto; }
   .log::before { content: ''; position: absolute; left: 6.5px; top: 14px; bottom: 12px; width: 1px; background: var(--rule-strong); }
   .commit { position: relative; border-bottom: 1px solid var(--rule); }
   .row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; width: 100%; padding: 14px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -383,9 +374,15 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
   .diff { display: grid; gap: 12px; }
   .diff > :first-child { margin-top: 2px; } .diff > :last-child { margin-bottom: 22px; }
   .diff .cs { margin: 0; max-width: 60ch; font-size: 0.9375rem; line-height: 1.6; color: var(--text); }
-  .plus { list-style: none; margin: 0; padding: 10px 12px; border-radius: 10px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; font-size: 0.75rem; color: var(--text); background: color-mix(in oklab, var(--ok) 7%, transparent); border-left: 2px solid var(--ok); }
+  /* Results as an added hunk in a diff: hunk header, then one + line per number. */
+  .plus { max-width: 60ch; border-radius: 10px; overflow: hidden; font-size: 0.75rem; border: 1px solid color-mix(in oklab, var(--ok) 24%, transparent); background: color-mix(in oklab, var(--ok) 5%, transparent); }
+  .hunk { margin: 0; padding: 6px 12px; font-size: 0.6875rem; color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, transparent); border-bottom: 1px solid color-mix(in oklab, var(--ok) 18%, transparent); }
+  .hunk span { color: var(--muted); }
+  .plus ul { list-style: none; margin: 0; padding: 6px 0; display: grid; grid-template-columns: auto auto minmax(0, 1fr); line-height: 1.5; }
   .plus li { display: contents; }
-  .plus b { color: var(--ok); font-weight: 500; white-space: nowrap; }
+  .plus .sg { padding: 4px 10px 4px 12px; color: var(--ok); opacity: 0.7; user-select: none; }
+  .plus b { padding: 4px 18px 4px 0; color: var(--ok); font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .plus .lb { padding: 4px 12px 4px 0; color: var(--text); }
   .go { flex: none; font-size: 0.75rem; color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
   .go:hover { text-decoration-color: currentColor; }
   .root { position: relative; margin: 0; padding: 14px 0 0; font-size: 0.6875rem; color: var(--muted); }
@@ -438,6 +435,10 @@ const keys = stackIcons.map((s) => ({ label: s.label, icon: s.icon }));
     .band { height: 22px; }
 
     .card-foot { flex-direction: column; align-items: flex-start; }
+    .plus ul { grid-template-columns: auto minmax(0, 1fr); row-gap: 0; }
+    .plus b { padding: 6px 12px 0 0; }
+    .plus .sg { padding: 6px 10px 0 12px; }
+    .plus .lb { grid-column: 2; padding: 0 12px 6px 0; color: var(--muted); }
 
     .contact .cta { display: grid; grid-template-columns: 1fr; }
     .contact .cta > :global(*) { justify-content: center; }
