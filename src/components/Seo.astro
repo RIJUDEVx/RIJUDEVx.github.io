@@ -28,7 +28,8 @@ const ogAlt = w
   ? `Case study: ${w.title}. ${w.summary}`
   : `${profile.name}, ${profile.title} at ${profile.company.name}. Backend-focused full stack engineer.`;
 const videoUrl = video ? new URL(video.url, site).href : undefined;
-const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
+// Google Search Console ownership token. It is public by design (it sits in the page head).
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION || 'qeFf1D_NOUA_-Yu_8zGYyd8r-TqNO86QEDq55LxWVqE';
 
 const personId = `${origin}/#person`;
 const websiteId = `${origin}/#website`;
